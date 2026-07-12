@@ -1,0 +1,1093 @@
+# Canonical source of truth for my professional background.
+# The CV (cv/) and business card (business_card/) are derived from the
+# information below — update this file first, then regenerate those documents.
+
+contact:
+  full_name: Lluc Santamaria Riba
+  email: lluc.santa@gmail.com
+  linkedin: https://linkedin.com/in/lluc-santamaria/
+  github: https://github.com/Lluc24
+  personal_hub: https://linktr.ee/lluc_santamaria
+
+experience:
+  - title: Associate AI Engineer
+    organization: Prosper AI
+    employment_type: Full-time
+    start_date: 2026-08
+    end_date: null
+    location: Barcelona, Catalonia, Spain
+    location_type: Hybrid
+    description: >
+      AI Engineer at Prosper AI, a Y Combinator startup backed by a 30
+      million dollar Series A led by Andreessen Horowitz, building real-time
+      voice AI agents for healthcare that place thousands of calls every day
+      to patients and payors, automating workflows such as appointment
+      scheduling, insurance benefits verification, prior authorizations and
+      billing. Working from the Barcelona engineering office under the
+      direction of Arnau Saumell, I focus on the reliability and
+      observability of the voice agent platform under production call load,
+      on scaling integrations with Electronic Health Record (EHR) systems,
+      and on building reusable agent templates for the client-facing teams
+      that configure and deploy agents for customers. The role sits at the
+      heart of the low-latency speech and large language model orchestration
+      stack, covering speech orchestration, turn-taking and real-time
+      reasoning.
+    key_points:
+      - Harden reliability of voice agents placing thousands of calls a day
+      - Scale EHR integrations across 80+ health record and practice systems
+      - Ship reusable agent templates for teams deploying agents to clients
+
+  - title: Balsells Research Fellow
+    organization: University of California, Irvine
+    employment_type: Full-time
+    start_date: 2026-02
+    end_date: 2026-07
+    location: Irvine, California, United States
+    location_type: On-site
+    description: >
+      I completed a six-month research stay as a Balsells Research Fellow at
+      the Donald Bren School of Information and Computer Sciences, University
+      of California, Irvine, supervised by Professor Vijay Vazirani, one of
+      the leading figures in algorithmic game theory, recipient of the 2022
+      John von Neumann Theory Prize and an ACM Fellow. The fellowship, funded
+      by the Balsells Foundation and awarded each semester to up to three
+      engineering students from Catalonia, also served as my Bachelor's
+      Senior Project at the Universitat Politècnica de Catalunya (UPC),
+      co-advised by Professor Maria José Serna Iglesias. My core deliverable
+      was the first public implementation of a novel combinatorial algorithm
+      that Professor Vazirani had recently designed and published
+      (arXiv:2402.11437, accepted at ACM EC, the premier conference on
+      economics and computation) for computing the leximin core imputation
+      of the assignment game: the unique profit allocation that
+      lexicographically maximizes the outcome of the worst-off agent
+      first, then the next worst-off, and so on, while remaining stable
+      within the cooperative game's core. I built the solver in Python with
+      exact rational arithmetic, using NetworkX for maximum-weight matching,
+      and open-sourced it under the MIT license at github.com/Lluc24/leximin.
+      Around it I built an independent LP-based reference solver (PuLP) to
+      cross-check correctness, a seeded random graph generator for degenerate
+      and non-degenerate benchmark families, and a reproducible experimental
+      pipeline that validated the algorithm's output on 1,320 generated
+      instances and showed runtime and memory scaling consistent with the
+      theoretical bounds (O(n^5) and O(n^2) on dense graphs). The broader
+      research context spanned matching theory, graph theory and cooperative
+      game theory. I presented and defended the resulting thesis at the
+      Facultat d'Informàtica de Barcelona (FIB), UPC, on July 1, 2026, before
+      a three-member tribunal, receiving a final grade of 9.6/10.
+    key_points:
+      - Built the first public implementation of Vazirani's leximin algorithm
+      - Turned a paper accepted at ACM EC into a working open-source solver
+      - Awarded the Balsells Fellowship, at most 3 granted per semester
+      - Earned a 9.6/10 defending the thesis at UPC as my Senior Project
+
+  - title: Equity Analyst
+    organization: Investment Society Lausanne
+    employment_type: Extracurricular
+    start_date: 2025-09
+    end_date: 2026-01
+    location: Lausanne, Vaud, Switzerland
+    location_type: On-site
+    description: >
+      As an Equity Analyst at the Investment Society Lausanne, a student
+      association at HEC Lausanne (the business faculty of the University of
+      Lausanne) and one of the few student societies managing a real-money
+      fund, I helped run a 25k CHF portfolio under a strict value investing
+      mandate in the tradition of Warren Buffett and Benjamin Graham:
+      undervalued companies with a durable moat and growing dividends, held
+      for five years or more. Analysts work in sector teams of five (one
+      portfolio manager and four equity analysts) that each pitch two stocks
+      per semester to the general assembly; my team covered the Technology
+      and Semiconductors sector.
+
+      I sourced our first pick, Melexis NV, a Belgian fabless designer of
+      automotive sensor chips, and owned the financial analysis (income
+      statement, cash flow, balance sheet and dividend ratios spanning 2013
+      to 2024) together with the moat thesis inside the electric vehicle
+      supply chain: proprietary sensing technology, prohibitive
+      requalification switching costs for car makers, and gross margins held
+      above 40% for a decade. For our second pick, Magyar Telekom, Hungary's
+      leading telecom operator and a Deutsche Telekom subsidiary, I delivered
+      the industry overview and the moat analysis of its position in a
+      consolidated three-player oligopoly with prohibitive entry barriers.
+      Both pitches won over 75% of the votes in a general assembly of more
+      than 50 members: the fund bought Melexis on November 10, 2025 at 57.7
+      EUR and Magyar Telekom on December 8, 2025 at 1,744 HUF, and by July
+      2026 they traded at 74 EUR (up 28%) and 2,670 HUF (up 53%). I also
+      represented the association at value investing workshops run by Pictet,
+      Société Générale and RH Asset Management.
+    key_points:
+      - Pitched Melexis and Magyar Telekom into a 25k CHF fund with 75%+ votes
+      - Modeled 12 years of Melexis three-statement financials and its EV moat
+      - Both picks gained 28% and 53% within 8 months of entering the fund
+
+  - title: Machine Learning Research Intern
+    organization: Barcelona Supercomputing Center
+    employment_type: Internship
+    start_date: 2025-07
+    end_date: 2025-08
+    location: Barcelona, Catalonia, Spain
+    location_type: On-site
+    description: >
+      During my summer internship at the Barcelona Supercomputing Center (BSC)
+      in the Workflows and Distributed Computing group, directed by Rosa M.
+      Badia and mentored by researcher Eduardo Iraola, I built and trained the
+      first large language model (LLM) specialized in PyCOMPSs, the group's
+      Python framework for task-based parallelism on clusters. General LLMs
+      have barely seen PyCOMPSs during pre-training and hallucinate when asked
+      for it, yet many teams using BSC's supercomputers need it to run their
+      code in parallel without being parallel programming experts. The goal
+      was a model that generates PyCOMPSs-parallelized Python code from
+      either a sequential program or a plain-text description.
+
+      I owned the project end to end. I first learned PyCOMPSs by writing my
+      own parallel applications, including a distributed Q-learning agent,
+      then implemented and updated more than 30 parallel applications in the
+      PyCOMPSs examples repository (linear algebra, sorting, a convolutional
+      neural network, Mandelbrot and others), representative of the workloads
+      typically run with the framework, so they were runnable, consistent and
+      reliable enough to become training data. On top of that corpus I
+      implemented a CLI pipeline, covered by unit and black-box tests, that
+      scrapes each application, automatically derives a sequential version of
+      the parallel code and validates it by execution, and assembles two
+      instruction datasets: sequential code to parallel code, and description
+      to parallel code. The pipeline can also reconstruct runnable source
+      files back from any dataset for inspection and debugging.
+
+      Finally I fine-tuned CodeLlama 7B with LoRA adapters on multi-GPU nodes
+      of MareNostrum 5. Real applications tokenize far beyond common defaults
+      (up to 7,469 tokens against a 700-token default), which first caused
+      silent truncation and then CUDA out-of-memory crashes. I wrote a
+      lightweight training script from scratch to isolate the memory
+      behaviour, found a stable configuration (per-device batch size 2 with
+      16 gradient accumulation steps and fp16), diagnosed a silent hang
+      caused by mismatched Python modules between the cluster's
+      general-purpose and accelerated partitions, and ported the working
+      settings back into the pipeline for reproducible, checkpointed
+      training. The result was the first fine-tuned models for PyCOMPSs code
+      generation, verified against training prompts and by manual inspection
+      and documented in an internship report. Both my director and my mentor
+      published LinkedIn recommendations describing this work.
+    key_points:
+      - Fine-tuned CodeLlama 7B into the first LLM able to write PyCOMPSs code
+      - Implemented and updated 30+ parallel apps mirroring real HPC workloads
+      - Built a unit-tested pipeline turning the apps into 2 LLM datasets
+      - Tamed CUDA OOM on MareNostrum 5 to train with 7,500-token prompts
+
+  - title: Technology Instructor
+    organization: Eixos Creativa
+    employment_type: pa
+    start_date: 2025-04
+    end_date: 2025-06
+    location: Barcelona, Catalonia, Spain
+    location_type: On-site
+    description: >
+      As a Technology Instructor at Eixos Creativa, a Barcelona company
+      running creative technology programs for kids, I taught an
+      extracurricular program to children aged 10 to 12 at three locations,
+      with a weekly one-hour session at each: two public schools in Barcelona
+      (Xirinacs School and Llacuna del Poblenou School) and the Eixos
+      Creativa Academy. I led every class on my own, typically 10 to 12
+      students and up to 15, and was also responsible for grading them. The
+      sessions were hands-on projects mixing programming, robotics and arts
+      with Scratch and Makey Makey kits: the students built playful devices
+      such as custom gamepads, an Operation Game and DJ tables, picking up
+      concepts like basic electronics, conductivity and interactive design
+      along the way. My approach gave them freedom to build autonomously
+      while I moved between groups supporting whoever was stuck, adapting
+      explanations of the harder concepts to each group's pace. I fostered a
+      collaborative learning environment by having them work in pairs and
+      groups, letting them divide the work and split tasks among themselves
+      to reach the project goal.
+    key_points:
+      - Solely led and graded 3 weekly classes of up to 15 kids aged 10-12
+      - Guided builds of gamepads and DJ tables with Scratch and Makey Makey
+
+  - title: Software Engineer Intern
+    organization: ALBA Synchrotron
+    employment_type: Internship
+    start_date: 2024-10
+    end_date: 2025-04
+    location: Cerdanyola del Vallès, Catalonia, Spain
+    location_type: On-site
+    description: >
+      I completed a six-month internship as a Software Engineer Intern at
+      ALBA Synchrotron, the leading synchrotron light source in the
+      Mediterranean region, in the Management Information Systems (MIS)
+      section of the Computing Division, the team building the internal
+      systems that streamline operations, automate processes and deliver
+      custom software for the center. Managed by Toni Fernández, head of the
+      Software Development and QA group, I worked across backend and
+      frontend in a 12-person Scrum team (daily stand-ups, sprint planning
+      and reviews) with two stacks: Django rendering its own HTML templates
+      with JavaScript behind them, or Django with Django REST Framework
+      exposing RESTful APIs to an AngularJS frontend, on MySQL and
+      PostgreSQL databases.
+
+      I contributed to three internal products. For the hiring application
+      that digitalizes ALBA's recruitment workflow (as a public and highly
+      specialized scientific facility it follows particular procedures that
+      previously circulated on paper), I contributed to implementing the
+      state machine driving each application through the phases of the
+      process. On the main beamline management system, where scientists
+      propose projects, vote on proposals and get assigned beamline hours
+      and turns, I improved the responsiveness and usability of the web
+      interface, making its tables adapt through Bootstrap's responsive
+      grid to three breakpoints (4 columns on mobile devices, 6 on medium
+      and 8 on large screens), directly impacting accessibility and user
+      experience. For the Project Management web app, I helped model the
+      lifecycle of scientific projects into web abstractions and integrated
+      it with ALBA's central user database to create teams, select leaders
+      and assign roles.
+
+      I did this internship concurrently with my full-time Computer
+      Engineering studies, keeping my academic excellence as the top-ranked
+      student of my class at the Universitat Politècnica de Catalunya (UPC),
+      while growing in teamwork, technical communication and adaptability in
+      a multicultural, multidisciplinary environment. My manager published a
+      LinkedIn recommendation of my work, highlighting my autonomy,
+      proactivity and speed of learning.
+    key_points:
+      - Shipped features for 3 internal Django apps in a 12-person Scrum team
+      - Co-built the state machine digitalizing ALBA's paper hiring process
+      - Revamped UX of the app scheduling beamline hours, votes and turns
+      - Kept the #1 rank of my UPC class while interning alongside studies
+
+  - title: Waiter
+    organization: Ibericus (Baricentro)
+    employment_type: Full-time
+    start_date: 2024-07
+    end_date: 2024-08
+    location: Barberà del Vallès, Catalonia, Spain
+    location_type: On-site
+    description: >
+      Summer job as a waiter at Ibericus in the Baricentro shopping center
+      in Barberà del Vallès (the legal employer behind the brand is FIC5
+      SHOP SL). I served tables end to end, taking orders and preparing
+      them myself: making coffees as a barista, pouring beverages and
+      sodas, and relaying food orders to the kitchen. I managed the
+      20-table interior area entirely on my own, with the terrace raising
+      the total to around 40 tables covered with a small team, keeping
+      high service standards under pressure during peak hours. I also kept
+      stock, ran the dishwasher, prepared sandwiches in the kitchen area,
+      and handled opening and closing, including all the cleaning and its
+      procedures.
+    key_points:
+      - Ran the 20-table interior area solo, from orders to barista coffee
+      - Handled stock, kitchen prep, cleaning and opening/closing routines
+
+  - title: Teaching Assistant
+    organization: Facultat d'Informàtica de Barcelona
+    employment_type: Part-time
+    start_date: 2024-02
+    end_date: 2024-06
+    location: Barcelona, Catalonia, Spain
+    location_type: On-site
+    description: >
+      As a second-year student I was awarded a scholarship by the
+      Universitat Politècnica de Catalunya (UPC) to teach Discrete
+      Mathematics, covering graph theory and linear algebra and known
+      as one of the hardest first-year courses at the Facultat
+      d'Informàtica de Barcelona, the UPC school of informatics.
+      I taught two weekly 2-hour sessions with 10 to 12 students each,
+      open to all first-year students for free. The sessions were problem
+      focused: rather than repeating the theory the professors cover in
+      lectures, I guided students through exercises and helped each one
+      where they got stuck. The position took 10 hours per week, 6 of
+      preparation and 4 of teaching. I was also given the coordinator
+      role among the Discrete Mathematics lecturers, responsible for
+      keeping the sessions consistent across all the groups. All my
+      students passed the course, several scoring above 8 out of 10 in
+      the exams, and many thanked me personally for the help.
+    key_points:
+      - Won a UPC scholarship to teach Discrete Math in my 2nd year
+      - All my students passed one of UPC's hardest courses, some with 8+/10
+
+  - title: Private Tutor
+    organization: Self-employed
+    employment_type: Self-employed
+    start_date: 2021-12
+    end_date: 2024-06
+    location: Barcelona, Catalonia, Spain
+    location_type: On-site
+    description: >
+      Private STEM tutor for baccalaureate students (Spain's two-year
+      pre-university stage), teaching Physics, Mathematics, Chemistry
+      and Industrial Technology. I started while still in the second
+      year of the technology-track baccalaureate myself, tutoring a
+      first-year student in physics and mathematics, and went on to
+      tutor four more students during my first two years of university.
+      Being only about a year ahead of most of them, I taught through
+      problem-focused lessons tailored to each student: they did the
+      work themselves, at their own pace, while I unblocked them when
+      they got stuck and explained the concepts they found hardest,
+      building understanding they could keep applying without me by
+      their side. All my students raised their grades significantly,
+      performed excellently in the Spanish university entrance exams
+      (PAU) and got into the degrees they wanted. The case I am
+      proudest of: I took over a second-year student mid-course who
+      was expected to master integrals, 3D geometry and linear algebra
+      for the PAU but could not yet differentiate or handle elementary
+      functions; after an intensive catch-up plan built around his
+      willingness to learn, he scored a perfect 10/10 in mathematics
+      at the PAU and entered the degree he wanted.
+    key_points:
+      - Tutored 5 pre-university students in STEM through Spain's PAU exams
+      - Took a student from no calculus to a 10/10 in PAU Mathematics
+      - All my students raised their grades and entered target degrees
+
+  - title: Crew Member
+    organization: McDonald's (Baricentro)
+    employment_type: Part-time
+    start_date: 2023-06
+    end_date: 2023-08
+    location: Barberà del Vallès, Catalonia, Spain
+    location_type: On-site
+    description: >
+      My first employment contract, a summer as a crew member at the
+      McDonald's in the Baricentro shopping center in Barberà del
+      Vallès. I chose it deliberately: among the starter jobs available
+      at that age, I went for the hardest and most grounded one, to
+      build discipline, feel first-hand what hard work demands, and
+      prove to myself I could take on anything. Hired half-time (the
+      standard contract at McDonald's), I was assigned enough extra
+      hours to effectively work full time. The kitchen ran at a pace
+      that left no room to hesitate or wait for instructions, so I
+      learned each station quickly and operated autonomously within my
+      first days. I started on the production line assembling burgers,
+      nuggets and the rest of the menu, and progressively covered the
+      whole restaurant: grilling, frying, restocking stations, serving
+      food and waiting tables in the dining area, and closing, from
+      washing utensils and trays and machine-washing the rags and
+      uniforms to leaving every surface at McDonald's strict quality
+      and cleanliness standards.
+    key_points:
+      - Ran production line, grill and fryers at McDonald's peak-hour pace
+      - Learned every station within days, working with full autonomy
+
+education:
+  - institution: Universitat Politècnica de Catalunya
+    program: Bachelor's Degree in Informatics Engineering, major in Computer Science
+    start_date: 2022-09
+    end_date: 2026-06
+    grade: 9.27 / 10
+    description: >
+      Bachelor's degree in Informatics Engineering with a major in
+      Computer Science at the Facultat d'Informàtica de Barcelona
+      (FIB), Universitat Politècnica de Catalunya (UPC). I graduated
+      ranked #1 of a cohort of nearly 400 students, with a 9.27/10
+      GPA and honors in 16 of the 27 courses I took at UPC. Alongside
+      coursework, I was elected student delegate for three courses,
+      representing the cohort before the faculty, and taught Discrete
+      Mathematics to first-year students under a UPC teaching
+      scholarship. In my final year, I completed an academic exchange
+      at the École Polytechnique Fédérale de Lausanne (EPFL), taking
+      Master-level Computer Science courses, and my Senior Project
+      abroad at the University of California, Irvine, as a Balsells
+      Research Fellow supervised by Professor Vijay Vazirani,
+      defending it with a 9.6/10.
+    coursework:
+      - Programming I (8.6/10)
+      - Fundamentals of Mathematics (9.3/10, Honors)
+      - Introduction to Computers (8.0/10)
+      - Physics (8.2/10)
+      - Programming II (10.0/10, Honors)
+      - Computer Organization (9.3/10)
+      - Discrete Mathematics and Linear Algebra (9.3/10, Honors)
+      - Calculus (9.0/10, Honors)
+      - Probability and Statistics (10.0/10, Honors)
+      - Data Structures and Algorithms (10.0/10, Honors)
+      - Databases (9.0/10, Honors)
+      - Operating Systems (8.7/10)
+      - Embedded Systems and Interfacing (10.0/10, Honors)
+      - Introduction to Software Engineering (10.0/10, Honors)
+      - Computer Networks (10.0/10, Honors)
+      - Computer Architecture (10.0/10, Honors)
+      - Interaction and Interface Design (10.0/10, Honors)
+      - Business and Economics (9.6/10, Honors)
+      - Programming Project (9.5/10)
+      - Artificial Intelligence (9.0/10)
+      - Computer Graphics (9.2/10)
+      - Advanced Algorithms (7.2/10)
+      - Logic in Informatics (10.0/10, Honors)
+      - Parallelism (10.0/10, Honors)
+      - Programming Languages (8.5/10)
+      - Theory of Computation (8.4/10)
+      - Distributed Intelligent Systems (10.0/10, Honors)
+      - Senior Project at UC Irvine (9.6/10)
+    key_points:
+      - Ranked #1 of a cohort of nearly 400 students with a 9.27/10 GPA
+      - Awarded honors in 16 of the 27 courses taken at UPC
+      - Elected delegate for 3 courses, representing 400+ students
+      - Senior Project at UC Irvine as a Balsells Fellow, graded 9.6/10
+
+  - institution: École Polytechnique Fédérale de Lausanne (EPFL)
+    program: Undergraduate Exchange in Computer Science
+    start_date: 2025-09
+    end_date: 2026-01
+    grade: 5.8/6.0
+    description: >
+      Undergraduate exchange semester at the École Polytechnique
+      Fédérale de Lausanne (EPFL) through the Swiss-European Mobility
+      Programme (SEMP), the Swiss counterpart of Erasmus, funded by
+      four scholarships: the SEMP grant, the Becas Santander mobility
+      scholarship from Banco Santander, the Heyning-Roelli Foundation
+      scholarship, and the MOBINT-MIF mobility grant from AGAUR, the
+      Catalan government's agency for university grants. Since EPFL's
+      Bachelor takes three years, exchange students in their fourth
+      year join Master-level courses: I completed 30 ECTS with a 5.8/6
+      GPA, curating my selection from EPFL's broad catalogue. I took
+      two courses from the Mathematics Master's, Causal Thinking and
+      Mathematical Modeling of Behavior, to sharpen my mathematical
+      maturity, and Machine Learning, spanning the field from linear
+      regression to transformers and diffusion models, to consolidate
+      foundations I had not yet studied formally. Beyond coursework,
+      I chose to take on a research project to gain hands-on
+      experience: at the Programming Methods Laboratory (LAMP) of
+      Professor Martin Odersky, the creator of Scala, I designed a
+      divergence check for the Scala 3 compiler, replacing arbitrary
+      recursion limits with formal termination criteria, graded
+      6.0/6.0. Alongside my studies, I served as an Equity Analyst at
+      the Investment Society Lausanne, pitching stocks into its
+      real-money fund.
+    coursework:
+      - Research Project in Computer Science (6.0/6.0)
+      - Causal Thinking (5.75/6.0)
+      - Mathematical Modeling of Behavior (5.75/6.0)
+      - Machine Learning (5.5/6.0)
+    key_points:
+      - Completed 30 ECTS of Master-level CS courses with a 5.8/6 GPA
+      - Awarded 4 scholarships funding the exchange semester
+
+  - institution: Fundació Collserola
+    program: Baccalaureate, Technology Track
+    start_date: 2020-09
+    end_date: 2022-06
+    grade: 8.72/10
+    description: >
+      Technology-track baccalaureate (Spain's two-year pre-university
+      stage) at Fundació Collserola, completed with distinction
+      (8.72/10). Earned honors in the Spanish university entrance
+      exams (PAU) with a 12.7/14.
+    key_points:
+      - Honors in the Spanish university entrance exams (PAU), 12.7/14
+      - Graduated the baccalaureate with distinction, 8.72/10
+
+projects:
+  - name: Leximin Fair Core Imputation for Cooperative Games
+    github: github.com/Lluc24/leximin
+    description: >
+      First public Python implementation of Vijay Vazirani's combinatorial
+      algorithm for computing the leximin core imputation of the assignment
+      game (arXiv:2402.11437), a paper accepted at ACM EC, the premier
+      conference on economics and computation, that existed only as
+      abstract theory until this implementation; open-sourced under the
+      MIT license. The algorithm classifies every vertex and edge as
+      essential, viable or subpar, then runs a clock-based primal-dual
+      event loop over fundamental components to converge on the unique
+      leximin-optimal imputation, in O(mn^3) time and O(n^2) space.
+      The implementation uses exact rational arithmetic
+      (fractions.Fraction) throughout instead of floats, since an earlier
+      float-based prototype produced incorrect tightness decisions on
+      near-degenerate instances; it uses NetworkX for the underlying
+      maximum-weight matching calls. I built two supporting components to
+      make the result trustworthy on its own: an independent LP-based
+      reference solver (PuLP with the CBC backend) for cross-validation, and
+      a random bipartite graph generator producing both degenerate and
+      non-degenerate families across a range of sizes and densities with
+      fixed seeds for full reproducibility. Using that generator, I built a
+      benchmark suite of 1,320 graph instances (n from 4 to 67, three edge
+      densities, ten seeds per configuration) to cross-validate every
+      instance against the LP solver within a 1e-6 tolerance, and profiled
+      runtime (cProfile) and peak memory (tracemalloc) across the same
+      instances. Fitting ordinary least squares regressions to the log-log
+      transformed data showed runtime scaling consistent with O(n^5) and
+      memory scaling consistent with O(n^2) on dense graphs, in line with the
+      theoretical bounds. The project includes a full pytest suite,
+      structured logging and a CLI entry point; the accompanying thesis and
+      all supporting documentation are at github.com/Lluc24/leximin-docs.
+    key_points:
+      - Implemented the O(mn^3) clock-based primal-dual solver in pure Python
+      - Chose exact rational arithmetic after floats broke edge cases
+      - Cross-checked 1,320 seeded instances against an independent LP solver
+      - Benchmarks matched theoretical O(n^5) time and O(n^2) memory bounds
+
+  - name: Static Divergence Checking for Scala 3 Match Types
+    github: github.com/Lluc24/divergence
+    description: >
+      Research project turned language proposal for Scala 3, born at
+      the Programming Methods Laboratory (LAMP) of the École
+      Polytechnique Fédérale de Lausanne (EPFL) under the supervision
+      of Martin Odersky, the creator of Scala and author of javac,
+      and Matthieu Bovel. Match types, a core feature of type-level
+      programming in Scala 3, can diverge during reduction; the
+      compiler detected this by catching StackOverflowError at
+      runtime, an unsafe practice since the JVM does not guarantee
+      cleanup after a stack overflow (documented JDK issues include
+      bypassed finally blocks and locks left held) and the behavior
+      varies with platform and stack size. I designed a static check
+      that rejects potentially infinite reductions at compile time:
+      it extends the domination criterion of SIP-31 (byname
+      implicits) to match type argument lists, detecting both cycles
+      and strict structural growth over stable covering sets, with an
+      exemption for value-level iteration through compiletime.ops and
+      a grace threshold that keeps the full Scala 3 test suite and
+      known ecosystem patterns compiling unchanged. Through three
+      lemmas building on a generalized Dickson's Lemma, I proved by
+      contradiction that no reduction can run forever under the
+      check. I converged on the final pointwise-dominance algorithm
+      after three iterations and implemented it in the Scala 3
+      compiler (scala/scala3 PR #24661): every infinite reduction,
+      without exception, is now caught at compile time and reported
+      through dedicated error messages carrying the full reduction
+      trace. After an in-person presentation, Martin Odersky and the
+      LAMP team endorsed the work for the Scala Improvement Process:
+      the pre-SIP passed community discussion with the SIP committee
+      chair calling it excellent work that should be enshrined as a
+      SIP, and it now stands as a formal proposal (PR #136 in
+      scala/improvement-proposals) that will set, for future versions
+      of the language, both the rules a match type must satisfy to
+      compile and the guards by which the compiler detects and
+      rejects infinite reductions.
+    key_points:
+      - Designed a check catching 100% of infinite reductions (PR #24661)
+      - Supervised by Martin Odersky, creator of Scala and author of javac
+      - Backed by a three-lemma termination proof generalizing Dickson's Lemma
+      - Extended SIP-31's criterion with covering sets and complexity vectors
+      - Kept the full Scala 3 test suite and ecosystem compiling unchanged
+      - Scala Improvement Process (PR #136) to define Match Types behavior
+
+  - name: ClearPath, Voice Agent for Medical Intake
+    github: github.com/Lluc24/yc-hack
+    description: >
+      Voice agent replacing medical intake paperwork with a
+      conversation, built in a three-person team at the Y Combinator
+      Voice Agents Hackathon (May 2026, organized by Cekura and
+      Daily/Pipecat with NVIDIA, AWS and Twilio): patients simply
+      talk and the intake form fills itself, producing structured,
+      confirmed data in about 90 seconds. Two front-ends share one
+      Pipecat pipeline. On the web, the agent drives a live React
+      form through Pipecat 1.3.0's UI Agent protocol: the browser
+      streams its accessibility tree to the server and the agent
+      pushes commands that fill, highlight and scroll each field in
+      real time as the patient speaks. On the phone, the same agent
+      answers a Twilio call and completes the intake by voice for
+      patients without a smartphone; both channels land in a staff
+      dashboard backed by a FastAPI store. The pipeline runs NVIDIA
+      Nemotron open-weights models as both ears and brain (Nemotron
+      Speech Streaming for speech recognition, Nemotron-3-Super-120B
+      for reasoning and tool calling, at roughly 0.2 seconds to the
+      first answer token) over three runtime-selected transports:
+      browser WebRTC, Daily for cloud deployment and Twilio
+      WebSocket for telephony. We wrote spoken-number normalization
+      from scratch (spoken dates to structured values, digit-by-digit
+      parsing and read-back of IDs and phone numbers), resampled
+      8 kHz telephone audio to the 16 kHz the recognizer expects,
+      and stripped reasoning tokens the model leaked into spoken
+      output. To prove the agent beyond a happy-path demo, we built
+      an automated evaluation suite in Cekura with 6 LLM-judge
+      metrics and 6 simulated-caller scenarios (long member IDs,
+      self-corrections, adversarial callers) run against the live
+      deployment; the first run exposed a bug invisible in local
+      testing, the cloud transport silently shutting the agent down
+      on every call, and a single fix cycle took it from failing
+      every scenario to completing full intakes end to end.
+    key_points:
+      - Built a voice agent that fills medical intake forms as patients talk
+      - Drove a live React form from the agent via Pipecat's UI Agent protocol
+      - Served web and phone callers through one multi-transport pipeline
+      - Caught a silent deploy bug with 6 simulated-caller evals in Cekura
+
+  - name: Factpostor, a Social Deduction Party Game
+    github: github.com/Lluc24/factpostor
+    description: >
+      Web-based social deduction party game for 3 to 10 players on a
+      single passed-around device: each round, citizens receive a
+      true fact to defend while factpostors receive nothing and must
+      improvise believable lies, and after discussion the group
+      votes to expose them. Built solo with vanilla JavaScript, HTML
+      and CSS and zero external dependencies, so it runs offline in
+      any modern browser with no installation or backend; released
+      under the MIT license. Includes automatic role assignment, a
+      private role-reveal flow, multi-round play with persistent
+      player tracking and a hand-curated database of over 160
+      verifiable facts.
+    key_points:
+      - Shipped a zero-dependency browser party game for 3 to 10 players
+      - Curated 160+ verifiable facts behind the deduction rounds
+
+  - name: Healix, Encrypted Mood Journal on the Sui Blockchain
+    github: github.com/KianBahia/SUI_Hack
+    description: >
+      Decentralized platform for sharing and tracking personal
+      emotions, built in a team of five and winner of the 1,000
+      dollar prize at the SUI Foundation Hackathon 2025 in
+      Lausanne. Users post moods and short messages publicly or
+      privately: private entries are encrypted on-chain with SEAL
+      so that only wallets on an explicit allowlist, such as a
+      patient's therapist, can ever decrypt them, keeping
+      sensitive mental health data under the author's control
+      with no off-chain storage. I built the
+      blockchain side: the Move smart contracts storing posts,
+      notes and feeds as immutable Sui objects, the allowlist and
+      subscription modules gating access, and the TypeScript
+      encrypt-decrypt flow where a session key plus a signed
+      personal message drive SEAL's on-chain approval check. The
+      Next.js frontend connects wallets through Mysten's dapp-kit
+      and renders a public community feed filterable by mood.
+    key_points:
+      - Won the SUI Foundation Hackathon 2025 with an encrypted mood journal
+      - Wrote Move contracts storing private posts as immutable Sui objects
+      - Gated decryption to allowlisted wallets via SEAL session keys
+
+  - name: Transport Mode Choice Models for London
+    github: github.com/Lluc24/london-mode-choice-models
+    description: >
+      Discrete choice analysis of how Londoners pick between
+      walking, cycling, public transport and driving, built on
+      around 5,000 revealed-preference trips from the London
+      Passenger Mode Choice survey for the Mathematical Modeling of
+      Behavior course at the École Polytechnique Fédérale de
+      Lausanne (EPFL), in a team of four; graded 6.0/6.0. Starting
+      from a multinomial logit baseline, we relaxed one assumption
+      at a time: alternative-specific time sensitivities, age
+      interactions capturing observed heterogeneity, a Box-Cox
+      transform of travel time modeling diminishing sensitivity,
+      nested and cross-nested logit structures relaxing the
+      independence of irrelevant alternatives, and a mixed logit
+      with simulated error components. Every step was accepted or
+      rejected through formal statistics (likelihood-ratio tests,
+      t-tests, AIC and BIC) rather than fit intuition, improving
+      log-likelihood from -4448 to -3966. The preferred model then
+      answered questions a transport authority would ask: market
+      shares re-weighted to the true London population through a
+      stratified-sampling correction with confidence intervals;
+      policy forecasts showing a 1.50 GBP car charge cuts driving
+      share from 41.1% to 37.7%, absorbed almost entirely by public
+      transport, while a 20% fare cut slightly increases car use;
+      value-of-time estimates; and a full matrix of direct and
+      cross price elasticities. Estimated with Biogeme, pandas and
+      NumPy in a fully narrated notebook.
+    key_points:
+      - Modeled mode choice of 5,000 London travelers, graded 6.0/6.0
+      - Advanced from multinomial to mixed logit, formally testing each step
+      - Forecast a 1.50 GBP car charge cutting driving from 41.1% to 37.7%
+
+  - name: Robust Optimization and Surrogate Modeling, Research Collaboration
+    description: >
+      Research collaboration with the Chair of Operations,
+      Economics and Strategy (OES) at the École Polytechnique
+      Fédérale de Lausanne (EPFL), conducted in a team of three as
+      the second project of the Machine Learning course (CS-433)
+      and graded 9.0/10. We implemented a robust multicriteria
+      decision-making framework from the chair's ongoing research,
+      applied to portfolio optimization under preference
+      uncertainty in high-dimensional spaces; the methods and
+      results stay confidential because the underlying research is
+      unpublished proprietary work, so this entry deliberately
+      omits detail. The work spanned the full stack: automated
+      pipelines ingesting and normalizing large-scale financial
+      time series and alternative data, constrained optimization
+      solvers (SLSQP and HiGHS) integrated into a modular Python
+      framework, neural network surrogates built with scikit-learn
+      that approximate the objective with R2 above 0.99 under
+      cross-validation, and explainability techniques extracting
+      feature significance from the resulting black-box decisions,
+      all delivered as a fully reproducible codebase.
+    key_points:
+      - Turned an EPFL chair's robust-decision research into working code
+      - Trained neural surrogates of the objective with R2 above 0.99
+      - Extracted feature significance from black-box decision models
+      - Graded 9.0/10 and kept confidential as unpublished research IP
+
+  - name: CardioRisk, Heart Disease Prediction from Scratch
+    github: github.com/Lluc24/CardioRisk
+    description: >
+      Binary classifier predicting coronary heart disease risk from
+      328,135 health surveillance records of the CDC Behavioral Risk
+      Factor Surveillance System, built in a team of three for the
+      Machine Learning course (CS-433) at the École Polytechnique
+      Fédérale de Lausanne (EPFL), with every algorithm implemented
+      from scratch in NumPy since ML frameworks were not allowed.
+      The dataset poses real-world difficulties: 321 raw features,
+      45% missing values and a 90:10 class imbalance. We wrote
+      linear regression (gradient descent, stochastic gradient
+      descent and normal equations), ridge regression, logistic
+      regression, their L2-regularized forms and class-balanced loss
+      variants, plus a metadata-driven preprocessing pipeline
+      configured through JSON: it drops the 182 features with over
+      10% missing values, one-hot encodes categoricals, imputes and
+      standardizes continuous features, and applies 71 hand-curated
+      feature mappings drawn from the official CDC codebook.
+      Training used 5-fold cross-validation with standardization
+      computed strictly on each training fold to prevent data
+      leakage, a per-fold grid search over 100 decision thresholds
+      maximizing F1, and fold-averaged weights and thresholds for
+      the final model. An ablation across 8 model and
+      imbalance-treatment configurations selected logistic
+      regression with threshold adjustment as the best combination,
+      reaching 0.868 accuracy and 0.424 F1, and a degree-7
+      polynomial expansion study confirmed the feature-label
+      relationship is essentially linear. The code was rated
+      Outstanding by the course staff, earning an extra bonus, and
+      the report was graded 90%.
+    key_points:
+      - Predicted heart disease on 328K CDC records with pure NumPy models
+      - Hit 0.868 accuracy and 0.424 F1 despite a 90:10 class imbalance
+      - Code rated Outstanding with an extra bonus by EPFL course staff
+
+  - name: Game-Theoretic Multi-Agent Reinforcement Learning
+    github: github.com/Lluc24/multiagent-RL
+    description: >
+      Study of reinforcement learning in Pogema, a partially
+      observable multi-agent grid world where agents must reach
+      their goals while implicitly coordinating, done in a team of
+      three for the Distributed Intelligent Systems course of the
+      Universitat Politècnica de Catalunya (UPC); graded 11.75 over
+      a maximum of 12. We implemented Joint-Action Learning with
+      game-theoretic solution concepts, computing mixed strategies
+      from Nash equilibria, Pareto optimality, welfare maximization
+      and minimax at every learning step, and added the REINFORCE
+      policy gradient as a bonus extension worth 2 extra points.
+      Rather than using the provided course skeleton, we built our
+      own experiment architecture integrated with Weights & Biases
+      and ran more than 600 logged training runs, randomly
+      searching seven hyperparameters, namely the discount factor
+      plus the maximum, minimum and decay rate of the exploration
+      and learning-rate schedules, with 100 runs per solution
+      concept and an exhaustive 126-configuration sweep for the
+      REINFORCE extension. My part covered three research
+      questions: which configurations converge best in individual
+      and collective reward, how behavior changes across solution
+      concepts, and whether agents trained on different solution
+      concepts can still coordinate. Further experiments compared
+      joint-action learning against independent Q-learning and
+      tested generalization from 2x2 up to 8x8 maps, two to four
+      agents, and previously unseen layouts. A dependency conflict
+      between Pogema and Weights & Biases was solved by running two
+      virtual environments communicating through serialized files.
+    key_points:
+      - Trained agents with Nash, Pareto, minimax and welfare strategies
+      - Swept 7 hyperparameters across 600+ logged Weights & Biases runs
+      - Generalized from 2x2 to 8x8 grids, 2 to 4 agents and unseen maps
+      - Graded 11.75/12 after a REINFORCE extension earned the full bonus
+
+  - name: Snap2Shop, Visual Fashion Search at HackUPC 2025
+    github: github.com/AlexGonzalezFernandez/VisualSearch-HackUPC2025
+    description: >
+      Mobile app that turns a photo of any clothing item into
+      matching products from Inditex brands such as Zara,
+      Pull&Bear and Oysho, with names, prices and purchase links;
+      built in a team of four for the Inditex Tech challenge at
+      HackUPC 2025, Europe's largest student hackathon, hosted at
+      the Universitat Politècnica de Catalunya (UPC). A Flutter
+      app snaps or picks the photo and sends it to a FastAPI
+      backend in Python that bridges Inditex's Visual Search API:
+      it uploads images to obtain the public URLs the API
+      requires, caches API and scraping responses to survive
+      hackathon rate limits, and falls back to scraping Zara's
+      site for product images. I built the Inditex API
+      integration, the image-to-URL upload path, the caching
+      layer and the favorites feature, and polished the Flutter
+      frontend.
+    key_points:
+      - Turned clothing photos into shoppable Zara products at HackUPC 2025
+      - Bridged Inditex's Visual Search API with caching to beat rate limits
+      - Built favorites and the camera flow in the Flutter mobile app
+
+  - name: miniJ, Interpreter for an APL-Family Array Language
+    github: github.com/Lluc24/miniJ
+    description: >
+      Complete interpreter for G, a simplified dialect of the array
+      language J (the ASCII successor of APL, created by Turing
+      Award winner Kenneth Iverson), built with Python, ANTLR and
+      NumPy for the Languages and Programming Paradigms course of
+      the Bachelor's Degree in Informatics Engineering at the
+      Universitat Politècnica de Catalunya (UPC); graded 10/10. I
+      implemented the whole language pipeline end to end: an ANTLR
+      grammar handling right-associative, right-to-left expression
+      evaluation, lexical and syntactic analysis, abstract syntax
+      tree construction, semantic checking and a tree-walking
+      evaluator. The language supports arithmetic, relational and
+      boolean operators over whole vectors, scalar-to-vector
+      broadcasting, list operations (concatenation, filtering,
+      indexing, iota), adverbs such as fold and reflex, and
+      first-class user-defined functions composable into new ones.
+      The architecture separates three decoupled layers (a driver,
+      an AST visitor with symbol tables and an operand stack, and a
+      NumPy-backed execution engine), so the numeric backend could
+      be swapped without touching interpreter logic. Function
+      bodies store their AST and evaluate lazily on application,
+      and operators requiring matching operand lengths return
+      closures that validate sizes at call time, turning length
+      mismatches into clear semantic errors instead of crashes.
+      Ships six reproducible test suites diffed against golden
+      output files by a one-command runner.
+    key_points:
+      - Built a full interpreter for an APL-family language, graded 10/10
+      - Designed the grammar, AST visitor and NumPy engine as decoupled layers
+      - Supported lazy evaluation, function composition and broadcasting
+
+  - name: Cliff Walking, Four RL Algorithms Compared
+    github: github.com/Lluc24/cliff-walking-rl
+    description: >
+      Head-to-head comparison of four reinforcement learning
+      algorithms, Value Iteration, Direct Estimation, Q-Learning
+      and REINFORCE, each implemented from scratch in Python with
+      NumPy on Gymnasium's Cliff Walking environment, coursework
+      in a team of three at the Universitat Politècnica de
+      Catalunya (UPC). The environment is a 4x12 grid where the
+      agent starts at the bottom-left corner and must reach the
+      bottom-right goal while skirting a cliff that spans the
+      whole bottom edge; every step costs -1 and falling costs
+      -100 and teleports the agent back to the start. The shortest
+      path takes 13 steps, but we used the slippery variant, where
+      the agent moves in the intended direction only one time in
+      three, which drops the optimal expected return from -13 to
+      -63. Value Iteration, given full access to the MDP, recovers
+      the exact -63 optimum and serves as the ground truth; Direct
+      Estimation reconstructs the transition and reward model from
+      random trajectories and plans to a near-optimal policy;
+      model-free Q-Learning with annealed exploration and learning
+      rates converges to about -70, within 11% of the optimum; and
+      REINFORCE stalls near -200 even after a random search over a
+      72,000-combination space of six hyperparameters. The report
+      traces that failure to the reward structure: the -100
+      penalty makes returns so high-variance that the policy
+      gradient cannot tell good actions from bad, and only
+      short-horizon, low-discount settings soften the collapse.
+      Every agent exposes sweep and run commands, all experiments
+      log to Weights & Biases for hyperparameter-importance
+      analysis, and learned policies render as per-tile action
+      maps.
+    key_points:
+      - Implemented 4 RL algorithm families from scratch in Python and NumPy
+      - Reached within 11% of the exact optimum with model-free Q-Learning
+      - Explored a 72,000-config hyperparameter space with W&B sweeps
+
+  - name: Redflix Watch-List Planner in PDDL
+    github: github.com/Lluc24/redflix-pddl-planner
+    description: >
+      Automated planning system that turns a streaming watch-list
+      into a valid weekly viewing schedule, built as a team project
+      for the Artificial Intelligence course of the Universitat
+      Politècnica de Catalunya (UPC). Shared-universe catalogs
+      impose real constraints: titles that must follow narrative
+      order, crossover episodes that only make sense watched
+      together, and limited free time each night. Instead of
+      hand-coding a scheduler, we modeled the problem declaratively
+      in the Planning Domain Definition Language (PDDL) with
+      typing, Action Description Language (ADL) constructs and
+      numeric fluents, and let the off-the-shelf Metric-FF planner
+      do the searching: two actions, one pulling a title and its
+      full prerequisite closure into the schedule and one assigning
+      it a day, are enough to express every rule. The domain
+      hardened across five levels, each adding one constraint:
+      from single prerequisites and one title per day, to arbitrary
+      prerequisite chains, to parallel content forced onto the same
+      or adjacent days, to a three-title daily cap, and finally to
+      a 200-minute nightly budget computed with fluents over each
+      title's runtime, tight enough to pack a 121-minute Star Wars
+      film and a 54-minute Breaking Bad episode into one 175-minute
+      Friday. Every level ships a hand-crafted example with its
+      solved plan plus an interactive Java generator emitting
+      random problems of any chosen size, used to stress-test the
+      domain beyond the curated cases.
+    key_points:
+      - Encoded an entire watch-list scheduler in 2 declarative PDDL actions
+      - Solved 200-minute nightly budgets with Metric-FF numeric fluents
+      - Stress-tested 5 domain levels with Java random problem generators
+
+  - name: Supermarket Shelf Layout Optimizer
+    github: github.com/Lluc24/supermarket-shelf-optimizer
+    description: >
+      Java 21 desktop application that arranges a supermarket
+      catalog so similar products sit side by side, milk beside
+      yogurt, beer beside chips, maximizing the cross-selling
+      value of the layout; built in a team of four for the
+      Programming Project course (PROP) of the Universitat
+      Politècnica de Catalunya (UPC) and graded 9.5/10. The
+      catalog is modeled as a complete weighted graph with 0-100
+      similarity scores on every product pair, making the layout
+      a maximum-weight Hamiltonian path problem, the NP-hard
+      optimization twin of the Traveling Salesman Problem. That
+      hardness drove the design: the engine ships three solvers
+      with distinct trade-offs, exact backtracking with pruning
+      that honors hard never-adjacent constraints, a multi-start
+      quadratic greedy for instant feedback on large catalogs,
+      and an O(n^2 log n) 2-approximation guaranteed to land
+      within twice the optimum. I implemented the 2-approximation,
+      the classic metric-TSP scheme of maximum spanning tree, tree
+      doubling, Eulerian traversal and shortcutting, with every
+      data structure beneath it built by hand: Kruskal's
+      algorithm, union-find with path compression and
+      Hoare-partition quicksort, leaving the optimization core
+      free of any algorithmic dependency. I also built the domain
+      facade, the application entry point, the Swing presentation
+      backbone, the solution-editor view and a headless CLI driver
+      proving the core runs fully decoupled from the GUI. The
+      system follows a strict three-layer architecture
+      (presentation, domain, persistence) with one-way
+      dependencies and typed exceptions, verified by 105 JUnit and
+      Mockito tests across 11 classes plus 13 scripted end-to-end
+      scenarios.
+    key_points:
+      - Solved NP-hard shelf layout with a provable 2-approximation in Java
+      - Hand-built Kruskal, union-find and Eulerian traversal, zero libraries
+      - Shipped a 3-layer Swing app, 105 unit + 13 e2e tests, graded 9.5/10
+
+  - name: Museum Visit Planner, a CLIPS Expert System
+    github: github.com/Lluc24/museum-visit-planner
+    description: >
+      Rule-based expert system that plans a personalized,
+      multi-day itinerary through the Museo del Prado from a
+      visitor's time budget, group composition, art knowledge and
+      preferences, built in a team of three for the Artificial
+      Intelligence course of the Universitat Politècnica de
+      Catalunya (UPC). Choosing which artworks to see, in what
+      order and through which rooms under a time budget is a
+      variant of the NP-hard Orienteering Problem, so instead of
+      searching, the system reasons like a museum guide: heuristic
+      classification abstracts the concrete request into a problem
+      archetype, maps it to a solution archetype (touristic versus
+      intellectual visit, viewing pace) and refines that into a
+      day-by-day route. The domain lives in a Web Ontology
+      Language (OWL) ontology authored in Protégé, covering the 75
+      most representative Prado artworks with their painters,
+      movements, eras and themes across 10 rooms with an explicit
+      adjacency graph; the owl2clips converter translates it into
+      object definitions for CLIPS (C Language Integrated
+      Production System), whose forward-chaining Rete engine fires
+      the rules, so a single knowledge model drives both design
+      and runtime. Reasoning splits into five CLIPS modules
+      handing control to one another; the refinement module alone
+      encodes 26 production rules combining preferences, visit
+      styles and room adjacency, prioritizing popular works for
+      touristic visits and complex ones for intellectual visits,
+      and planning rest breaks for children and retirees. Given a
+      family of four with children and retirees, one day and six
+      hours, the system schedules 18 artworks across 3 adjacent
+      rooms at a popularity-weighted pace; 8 recorded scenarios,
+      from an express visit to a stress test, replay through the
+      interpreter as regression tests for the rule base.
+    key_points:
+      - Planned personalized Prado itineraries with a CLIPS expert system
+      - Modeled 75 artworks and a 10-room adjacency graph as an OWL ontology
+      - Encoded 26 expert rules over 5 modules, verified by 8 replay tests
+
+  - name: Azamon Logistics Optimizer, Local Search
+    github: github.com/Lluc24/logistics-optimizer
+    description: >
+      Java local-search engine that assigns packages to shipping
+      offers in Azamon, a simulated Amazon-style logistics
+      network, minimizing delivery cost while maximizing customer
+      happiness; built in a team of three for the Artificial
+      Intelligence course of the Universitat Politècnica de
+      Catalunya (UPC) to compare Hill Climbing and Simulated
+      Annealing head to head on the same NP-hard problem. The task
+      is a variant of the Generalized Assignment Problem: m^n
+      candidate assignments, about 10^28 for 40 packages and 5
+      offers, under hard capacity and priority-deadline
+      constraints, scored by a user-weighted heuristic that trades
+      total cost against happiness earned by beating delivery
+      deadlines. A state is a complete assignment; move and swap
+      operators define the neighborhood and update cost
+      incrementally instead of recomputing from scratch, with
+      naive and greedy strategies seeding the search. Measured on
+      the same seeded 40-package instance, steepest Hill Climbing
+      evaluates the full neighborhood each step and converges in
+      26 steps to 391.48 EUR at 18 happiness points, while
+      Simulated Annealing takes 3,000 cheap single-neighbor steps
+      under an exponential cooling schedule and escapes local
+      optima to reach 22 happiness points at 400.85 EUR, the exact
+      cost-happiness tradeoff the heuristic weights are built to
+      control, measured on real runs. Initialization proved
+      secondary: local search erased most of the gap between naive
+      and greedy starts. Built on the AIMA-Java search framework
+      with course-provided domain classes; the state
+      representation, operators, heuristics and search wiring are
+      original work.
+    key_points:
+      - Compared Hill Climbing and Simulated Annealing on NP-hard assignment
+      - Designed incremental move and swap operators over 10^28 assignments
+      - Quantified annealing's edge, 22 vs 18 happiness for 2% more cost
+
+fellowships_and_scholarships:
+  - name: Balsells Fellowship, Research Scholarship
+    description: >
+      Fellowship selecting 3 Catalan engineering students per semester for
+      funded thesis research at the University of California, Irvine (UCI),
+      working directly with UCI faculty advisors. Endowed since 1995 by Pete
+      Balsells and his family at the Samueli School of Engineering, it
+      targets the most talented young engineers and scientists from
+      Catalonia, building on the California-Catalonia Sister State Agreement.
+
+  - name: Heyning-Roelli Foundation, Exchange Scholarship
+    description: >
+      Competitive merit-based scholarship from the Heyning-Roelli
+      Foundation, a Swiss foundation funding exchange semesters of
+      students with strong academic records, awarded for my exchange
+      at the École Polytechnique Fédérale de Lausanne (EPFL).
+
+  - name: Fundación Banco Santander, Exchange Scholarship
+    description: >
+      Becas Santander mobility scholarship from Fundación Banco
+      Santander, one of the world's largest corporate scholarship
+      programs, awarded on academic merit to top Spanish university
+      students for international exchange; funded my semester at the
+      École Polytechnique Fédérale de Lausanne (EPFL).
+
+  - name: ApadrinaTIC, Industry Scholarship and Mentorship, Twice Awarded
+    description: >
+      Scholarship and mentorship program of the Cercle Tecnològic
+      de Catalunya, a foundation backed by Catalan
+      technology companies, awarded to engineering students
+      selected on academic merit; I won it in two consecutive
+      editions, the 2024-25 and 2025-26 courses. Member companies
+      fund a stipend and pair each student with an industry mentor,
+      complemented by activities to know the sector from the
+      inside; in both editions I was matched with T-Systems Iberia,
+      the Iberian subsidiary of Deutsche Telekom's IT services arm.
+
+honors_and_recognition:
+  - name: Universitat Politècnica de Catalunya (UPC), Highest GPA Award
+    description: >
+      Award for the highest GPA of the Bachelor's Degree in
+      Informatics Engineering at the Universitat Politècnica de
+      Catalunya (UPC): ranked #1 of a cohort of nearly 400 students
+      with a 9.27/10 GPA over the first two years of the program.
+
+  - name: SUI Hackathon, Winner
+    description: >
+      Winner of the 1,000 dollar prize at the SUI Foundation
+      Hackathon 2025 in Lausanne with Healix, an encrypted
+      mood-sharing platform built on the Sui blockchain.
+
+  - name: Minister of Research and Universities, Honor Letter
+    description: >
+      Letter of recognition from the Minister of Research and
+      Universities for outstanding results in the Spanish university
+      entrance exams (PAU), passed with honors and a 12.7/14 mark.
+
+volunteering:
+  - organization: Anegx, Viu la natura al Parc Natural de la Garrotxa
+    description: >
+      80 hours of volunteering at the work camp of the Agrupació
+      Naturalista i Ecologista de la Garrotxa (Anegx) in Olot,
+      summer 2021: preservation and maintenance of natural
+      habitats, community work and environmental awareness
+      activities in the volcanic zone of the Garrotxa Natural Park.
+
+  - organization: Fundesplai, Recuperem el patrimoni de la Vall de Sau
+    description: >
+      60 hours of volunteering at the Fundesplai youth work camp in
+      Vilanova de Sau, summer 2020: environmental restoration and
+      conservation of the Guilleries-Savassona natural space,
+      wildlife monitoring, maintenance and signposting of hiking
+      trails, and restoration of the town's urban heritage.
+
+  - organization: El Teix, Muntanyes del Terraprim
+    description: >
+      40 hours of volunteering at the work camp of the Associació
+      Juvenil El Teix in Viladamat, summer 2019: recovering forest
+      degraded by wildfires and reconnecting the cultural heritage
+      landmarks of the Terraprim hills in Alt Empordà.

@@ -1,0 +1,10 @@
+.env
+.env.local
+.env*.local
+bot/.venv/
+__pycache__/
+*.pyc
+bot.log
+web.log
+.mcp.json
+.claude/
