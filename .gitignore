@@ -8,3 +8,4 @@ bot.log
 web.log
 .mcp.json
 .claude/
+.vscode/

@@ -65,10 +65,13 @@ export default function Console() {
   const clientRef = useRef<PipecatClient | null>(null);
   const connectingRef = useRef<Promise<PipecatClient> | null>(null);
   const speakerOnRef = useRef(speakerOn);
-  speakerOnRef.current = speakerOn;
   const botSegmentOpenRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    speakerOnRef.current = speakerOn;
+  }, [speakerOn]);
 
   // Boot sequence: reveal lines one by one.
   useEffect(() => {
@@ -77,15 +80,26 @@ export default function Console() {
     return () => clearTimeout(t);
   }, [bootCount]);
 
-  // Restore a message typed before an OAuth redirect.
-  useEffect(() => {
+  // Restore a message typed before an OAuth redirect. Adjusting state in
+  // response to a prop change during render (rather than in an effect)
+  // avoids an extra render pass; see https://react.dev/learn/you-might-not-need-an-effect
+  const [restoredForAuthStatus, setRestoredForAuthStatus] = useState<
+    typeof authStatus | null
+  >(null);
+  if (authStatus === "authenticated" && restoredForAuthStatus !== authStatus) {
+    setRestoredForAuthStatus(authStatus);
     const pending = sessionStorage.getItem(PENDING_KEY);
-    if (pending && authStatus === "authenticated") {
+    if (pending) {
       sessionStorage.removeItem(PENDING_KEY);
       setInput(pending);
+    }
+  }
+
+  useEffect(() => {
+    if (restoredForAuthStatus === "authenticated") {
       inputRef.current?.focus();
     }
-  }, [authStatus]);
+  }, [restoredForAuthStatus]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
@@ -296,7 +310,7 @@ export default function Console() {
           </p>
         ))}
         {messages.map((m) => (
-          <p key={m.id} className="whitespace-pre-wrap break-words">
+          <p key={m.id} className="whitespace-pre-wrap wrap-break-word">
             {m.role === "user" && (
               <>
                 <span className="text-user">you&gt;</span>{" "}
