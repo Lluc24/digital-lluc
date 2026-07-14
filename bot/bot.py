@@ -1,9 +1,9 @@
 """digital-lluc — the voice/text agent behind Lluc's website.
 
-Pipeline: Deepgram (STT) -> Anthropic Claude (LLM) -> Cartesia (TTS). RTVI
-is enabled by default on PipelineWorker, so text messages sent by the web
-client and the on-screen transcript both work the same way they did on the
-prior Gemini Live speech-to-speech pipeline.
+Pipeline: Deepgram (STT) -> OpenAI (LLM) -> Cartesia (TTS). RTVI is enabled
+by default on PipelineWorker, so text messages sent by the web client and
+the on-screen transcript both work the same way they did on the prior
+Gemini Live speech-to-speech pipeline.
 
 Run locally:   uv run bot.py --transport webrtc --port 7080
 Deploy:        pcc deploy   (see pcc-deploy.toml)
@@ -25,9 +25,9 @@ from pipecat.processors.aggregators.llm_response_universal import (
 )
 from pipecat.runner.types import RunnerArguments
 from pipecat.runner.utils import create_transport
-from pipecat.services.anthropic.llm import AnthropicLLMService
 from pipecat.services.cartesia.tts import CartesiaTTSService
 from pipecat.services.deepgram.stt import DeepgramSTTService
+from pipecat.services.openai.llm import OpenAILLMService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.transports.daily.transport import DailyParams
 from pipecat.workers.runner import WorkerRunner
@@ -58,18 +58,19 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         settings=CartesiaTTSService.Settings(voice=tts_voice),
     )
 
-    llm_settings = AnthropicLLMService.Settings(
-        system_instruction=build_system_prompt(),
-        enable_prompt_caching=True,
+    # OpenAI caches long, repeated prompt prefixes automatically (no opt-in
+    # flag) once they exceed ~1024 tokens, so the system prompt as the first
+    # context message is enough to get caching.
+    llm_model = os.environ.get("OPENAI_MODEL") or "gpt-5-mini"
+    llm = OpenAILLMService(
+        api_key=os.environ["OPENAI_API_KEY"],
+        settings=OpenAILLMService.Settings(model=llm_model),
     )
-    if os.environ.get("ANTHROPIC_MODEL"):
-        llm_settings.model = os.environ["ANTHROPIC_MODEL"]
-    llm = AnthropicLLMService(
-        api_key=os.environ["ANTHROPIC_API_KEY"],
-        settings=llm_settings,
-    )
+    logger.info(f"🧠 LLM: OpenAI {llm_model}")
 
-    context = LLMContext()
+    context = LLMContext(
+        messages=[{"role": "system", "content": build_system_prompt()}]
+    )
     user_aggregator, assistant_aggregator = LLMContextAggregatorPair(
         context,
         user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer()),
