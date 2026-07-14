@@ -121,7 +121,7 @@ export default function Console() {
       if (botSegmentOpenRef.current && last?.role === "bot") {
         return [
           ...m.slice(0, -1),
-          { ...last, text: last.text + text },
+          { ...last, text: last.text + (last.text ? " " : "") + text },
         ];
       }
       botSegmentOpenRef.current = true;
@@ -180,6 +180,8 @@ export default function Console() {
               }
             },
             onBotOutput: (data: BotOutputData) => {
+              // spoken_status ticks (in-progress/completed) repeat the same full text; only "new" is fresh content.
+              if (data.spoken_status && data.spoken_status !== "new") return;
               appendBotChunk(data.text);
             },
             onBotLlmStarted: () => {
