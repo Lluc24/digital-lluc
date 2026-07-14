@@ -141,13 +141,16 @@ export default function Console() {
       if (connectingRef.current) return connectingRef.current;
 
       const doConnect = async (): Promise<PipecatClient> => {
+        console.info("🚀 connecting session…");
         const res = await fetch("/api/agent/start", { method: "POST" });
         if (res.status === 401) {
+          console.warn("🔒 connect: auth required");
           setShowLogin(true);
           throw new Error("auth_required");
         }
         if (res.status === 429) {
           const d = await res.json();
+          console.warn(`🚫 connect: daily cap reached (${d.used}/${d.cap})`);
           append(
             "system",
             `Daily limit reached (${d.cap} sessions/day) — digital-lluc runs on real tokens. Come back tomorrow, or email the analog version.`,
@@ -155,6 +158,7 @@ export default function Console() {
           throw new Error("cap_exceeded");
         }
         if (!res.ok) {
+          console.error(`❌ connect: agent unavailable (${res.status})`);
           append("system", "Agent unavailable right now. Try again in a minute.");
           throw new Error("agent_unavailable");
         }
@@ -168,13 +172,17 @@ export default function Console() {
           enableMic: withMic,
           enableCam: false,
           callbacks: {
-            onTransportStateChanged: (s: TransportState) =>
-              setTransportState(s),
+            onTransportStateChanged: (s: TransportState) => {
+              console.info(`🔄 transport state: ${s}`);
+              setTransportState(s);
+            },
             onBotReady: () => {
+              console.info("✅ bot ready");
               append("system", "● connected — digital-lluc is listening.");
             },
             onUserTranscript: (data: TranscriptData) => {
               if (data.final) {
+                console.info(`🗣️ user transcript: ${data.text}`);
                 botSegmentOpenRef.current = false;
                 append("user", data.text);
               }
@@ -182,18 +190,23 @@ export default function Console() {
             onBotOutput: (data: BotOutputData) => {
               // spoken_status ticks (in-progress/completed) repeat the same full text; only "new" is fresh content.
               if (data.spoken_status && data.spoken_status !== "new") return;
+              console.info(`🤖 bot output: ${data.text}`);
               appendBotChunk(data.text);
             },
             onBotLlmStarted: () => {
+              console.info("🧠 LLM started");
               botSegmentOpenRef.current = false;
             },
             onBotLlmStopped: () => {
+              console.info("🧠 LLM stopped");
               botSegmentOpenRef.current = false;
             },
             onError: () => {
+              console.error("❌ transport error — session closed");
               append("system", "Connection error — session closed.");
             },
             onDisconnected: () => {
+              console.info("👋 disconnected");
               setTransportState("disconnected");
             },
           },

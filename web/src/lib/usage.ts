@@ -26,7 +26,7 @@ export async function checkAndCountSession(userId: string): Promise<UsageGate> {
   const client = redis();
   if (!client) {
     // No Redis configured (local dev): allow everything.
-    console.warn("usage: Upstash Redis not configured, skipping daily cap");
+    console.warn("⚠️ usage: Upstash Redis not configured, skipping daily cap");
     return { allowed: true, used: 0, cap };
   }
   const day = new Date().toISOString().slice(0, 10);
@@ -35,6 +35,7 @@ export async function checkAndCountSession(userId: string): Promise<UsageGate> {
   if (used === 1) {
     await client.expire(key, DAY_SECONDS);
   }
+  console.info(`📊 usage: ${userId} at ${used}/${cap} sessions today`);
   if (used > cap) {
     return { allowed: false, used, cap };
   }

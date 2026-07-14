@@ -107,16 +107,16 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
             }
         )
         await worker.queue_frames([LLMRunFrame()])
-        logger.info("Client connected")
+        logger.info("🔌 Client connected")
 
     @transport.event_handler("on_client_disconnected")
     async def on_client_disconnected(transport, client):
-        logger.info("Client disconnected")
+        logger.info("👋 Client disconnected")
         await worker.cancel()
 
     async def enforce_max_duration():
         await asyncio.sleep(MAX_SESSION_SECS)
-        logger.info(f"Max session duration ({MAX_SESSION_SECS}s) reached")
+        logger.info(f"⏰ Max session duration ({MAX_SESSION_SECS}s) reached")
         context.add_message(
             {
                 "role": "developer",
@@ -128,10 +128,12 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         )
         await worker.queue_frames([LLMRunFrame()])
         await asyncio.sleep(10)
+        logger.info("🛑 Ending session after goodbye")
         await worker.queue_frames([EndFrame()])
 
     watchdog = asyncio.create_task(enforce_max_duration())
 
+    logger.info("🚀 Starting pipeline worker")
     runner = WorkerRunner(
         handle_sigint=getattr(runner_args, "handle_sigint", False)
     )
@@ -140,6 +142,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         await runner.run()
     finally:
         watchdog.cancel()
+        logger.info("🏁 Pipeline worker stopped")
 
 
 async def bot(runner_args: RunnerArguments):

@@ -20,10 +20,12 @@ export async function POST() {
     const session = await auth();
     userId = session?.user?.email ?? null;
     if (!userId) {
+      console.warn("🔒 /api/agent/start: auth required, no session");
       return NextResponse.json({ error: "auth_required" }, { status: 401 });
     }
     const gate = await checkAndCountSession(userId);
     if (!gate.allowed) {
+      console.warn(`🚫 /api/agent/start: cap exceeded for ${userId} (${gate.used}/${gate.cap})`);
       return NextResponse.json(
         { error: "cap_exceeded", used: gate.used, cap: gate.cap },
         { status: 429 },
@@ -38,9 +40,11 @@ export async function POST() {
     // Local development: talk to a bot running on this machine.
     const webrtcUrl =
       process.env.LOCAL_BOT_WEBRTC_URL ?? "http://localhost:7080/api/offer";
+    console.info(`🧪 /api/agent/start: local dev bot at ${webrtcUrl}`);
     return NextResponse.json({ transport: "smallwebrtc", webrtc_url: webrtcUrl });
   }
 
+  console.info(`🚀 /api/agent/start: starting Pipecat Cloud agent "${agentName}" for ${userId ?? "anonymous"}`);
   const res = await fetch(`${PIPECAT_CLOUD_START_URL}/${agentName}/start`, {
     method: "POST",
     headers: {
@@ -55,11 +59,12 @@ export async function POST() {
 
   if (!res.ok) {
     const detail = await res.text();
-    console.error("pipecat cloud start failed:", res.status, detail);
+    console.error("❌ pipecat cloud start failed:", res.status, detail);
     return NextResponse.json({ error: "agent_unavailable" }, { status: 502 });
   }
 
   const data = (await res.json()) as { dailyRoom: string; dailyToken: string };
+  console.info(`✅ /api/agent/start: agent started, Daily room ready`);
   return NextResponse.json({
     transport: "daily",
     room_url: data.dailyRoom,
