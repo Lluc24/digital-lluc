@@ -20,7 +20,10 @@ flowchart LR
     W -->|start| PC[Pipecat Cloud]
     PC --> B[bot/ · digital-lluc]
     V <-->|"WebRTC (Daily)<br/>voice + text"| B
-    B <-->|speech-to-speech| G[Gemini Live<br/>ears + brain + voice]
+    B -->|audio| D[Deepgram · STT]
+    D --> C[Claude · Anthropic]
+    C --> K[Cartesia · TTS]
+    K -->|audio| B
     B -.reads.-> P[profile/ · BACKGROUND.yaml + PERSONAL.yaml]
 ```
 
@@ -41,9 +44,9 @@ available:
 - `web/` — Next.js 16 app (Vercel): terminal-style console UI, Auth.js
   (Google + GitHub), `/api/agent/start` with a per-user daily session cap
   (Upstash Redis), blog scaffolding under `content/blog/`.
-- `bot/` — Pipecat bot (Pipecat Cloud): Gemini Live speech-to-speech
-  (one model as ears, brain and voice, with built-in transcription),
-  persona compiled from `profile/`, hard session/idle timeouts.
+- `bot/` — Pipecat bot (Pipecat Cloud): Deepgram (STT) → Claude via
+  Anthropic (LLM) → Cartesia (TTS) pipeline, persona compiled from
+  `profile/`, hard session/idle timeouts.
 - `profile/` — the canonical background YAML the persona is built from
   (`BACKGROUND.yaml` synced from the my-profile repo, plus
   `PERSONAL.yaml` for everything off the clock).
@@ -53,7 +56,7 @@ available:
 ```bash
 # bot (terminal 1) — uv-managed (Python >= 3.13, pipecat 1.5.0)
 cd bot && uv sync
-cp .env.example .env   # fill GOOGLE_API_KEY (aistudio.google.com)
+cp .env.example .env   # fill DEEPGRAM_API_KEY, ANTHROPIC_API_KEY, CARTESIA_API_KEY
 uv run bot.py --transport webrtc --port 7080
 
 # web (terminal 2)

@@ -4,6 +4,6 @@ version = "0.1.0"
 description = "digital-lluc — the voice/text agent behind Lluc's website"
 requires-python = ">=3.13"
 dependencies = [
-    "pipecat-ai[google,daily,webrtc,runner]~=1.5.0",
+    "pipecat-ai[anthropic,cartesia,deepgram,silero,daily,webrtc,runner]~=1.5.0",
     "pyyaml~=6.0",
 ]

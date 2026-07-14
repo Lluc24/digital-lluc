@@ -1,10 +1,9 @@
 """digital-lluc — the voice/text agent behind Lluc's website.
 
-One Pipecat pipeline serves every modality through Gemini Live
-(speech-to-speech): the web client toggles audio in/out, text messages
-arrive as RTVI send-text messages handled by the built-in RTVI support
-(enable_rtvi on PipelineWorker), and Gemini Live's built-in transcription
-feeds the on-screen transcript.
+Pipeline: Deepgram (STT) -> Anthropic Claude (LLM) -> Cartesia (TTS). RTVI
+is enabled by default on PipelineWorker, so text messages sent by the web
+client and the on-screen transcript both work the same way they did on the
+prior Gemini Live speech-to-speech pipeline.
 
 Run locally:   uv run bot.py --transport webrtc --port 7080
 Deploy:        pcc deploy   (see pcc-deploy.toml)
@@ -15,16 +14,20 @@ import os
 
 from loguru import logger
 
+from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.frames.frames import EndFrame, LLMRunFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineParams, PipelineWorker
 from pipecat.processors.aggregators.llm_context import LLMContext
 from pipecat.processors.aggregators.llm_response_universal import (
     LLMContextAggregatorPair,
+    LLMUserAggregatorParams,
 )
 from pipecat.runner.types import RunnerArguments
 from pipecat.runner.utils import create_transport
-from pipecat.services.google.gemini_live.llm import GeminiLiveLLMService
+from pipecat.services.anthropic.llm import AnthropicLLMService
+from pipecat.services.cartesia.tts import CartesiaTTSService
+from pipecat.services.deepgram.stt import DeepgramSTTService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.transports.daily.transport import DailyParams
 from pipecat.workers.runner import WorkerRunner
@@ -47,35 +50,35 @@ transport_params = {
 
 
 async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
-    settings = GeminiLiveLLMService.Settings(
-        system_instruction=build_system_prompt(),
-        context_window_compression={"enabled": True},
-    )
-    # Let the service defaults pick model/voice unless overridden via env.
-    if os.environ.get("GEMINI_MODEL"):
-        settings.model = os.environ["GEMINI_MODEL"]
-    if os.environ.get("GEMINI_VOICE"):
-        settings.voice = os.environ["GEMINI_VOICE"]
+    stt = DeepgramSTTService(api_key=os.environ["DEEPGRAM_API_KEY"])
 
-    llm = GeminiLiveLLMService(
-        api_key=os.environ["GOOGLE_API_KEY"],
-        settings=settings,
+    tts_voice = os.environ.get("CARTESIA_VOICE", "71a7ad14-091c-4e8e-a314-022ece01c121")
+    tts = CartesiaTTSService(
+        api_key=os.environ["CARTESIA_API_KEY"],
+        settings=CartesiaTTSService.Settings(voice=tts_voice),
+    )
+
+    llm_settings = AnthropicLLMService.Settings(system_instruction=build_system_prompt())
+    if os.environ.get("ANTHROPIC_MODEL"):
+        llm_settings.model = os.environ["ANTHROPIC_MODEL"]
+    llm = AnthropicLLMService(
+        api_key=os.environ["ANTHROPIC_API_KEY"],
+        settings=llm_settings,
     )
 
     context = LLMContext()
-    # Gemini Live is a realtime (speech-to-speech) service: server-side VAD
-    # handles turn-taking, and realtime_service_mode keeps context-writing
-    # correct without a local VAD analyzer.
     user_aggregator, assistant_aggregator = LLMContextAggregatorPair(
         context,
-        realtime_service_mode=True,
+        user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer()),
     )
 
     pipeline = Pipeline(
         [
             transport.input(),
+            stt,
             user_aggregator,
             llm,
+            tts,
             transport.output(),
             assistant_aggregator,
         ]
@@ -96,8 +99,8 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     async def on_client_connected(transport, client):
         context.add_message(
             {
-                "role": "system",
-                "content": "Say hello",
+                "role": "developer",
+                "content": "Start the call by saying hello.",
             }
         )
         await worker.queue_frames([LLMRunFrame()])
@@ -111,8 +114,6 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     async def enforce_max_duration():
         await asyncio.sleep(MAX_SESSION_SECS)
         logger.info(f"Max session duration ({MAX_SESSION_SECS}s) reached")
-        # No TTS service in a speech-to-speech pipeline, so the goodbye has
-        # to come from Gemini itself; give it a moment before ending.
         context.add_message(
             {
                 "role": "developer",
