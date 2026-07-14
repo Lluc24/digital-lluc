@@ -52,13 +52,16 @@ transport_params = {
 async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     stt = DeepgramSTTService(api_key=os.environ["DEEPGRAM_API_KEY"])
 
-    tts_voice = os.environ.get("CARTESIA_VOICE", "71a7ad14-091c-4e8e-a314-022ece01c121")
+    tts_voice = os.environ.get("CARTESIA_VOICE") or "71a7ad14-091c-4e8e-a314-022ece01c121"
     tts = CartesiaTTSService(
         api_key=os.environ["CARTESIA_API_KEY"],
         settings=CartesiaTTSService.Settings(voice=tts_voice),
     )
 
-    llm_settings = AnthropicLLMService.Settings(system_instruction=build_system_prompt())
+    llm_settings = AnthropicLLMService.Settings(
+        system_instruction=build_system_prompt(),
+        enable_prompt_caching=True,
+    )
     if os.environ.get("ANTHROPIC_MODEL"):
         llm_settings.model = os.environ["ANTHROPIC_MODEL"]
     llm = AnthropicLLMService(
