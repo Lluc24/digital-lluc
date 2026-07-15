@@ -1,6 +1,5 @@
 agent_name = "digital-lluc"
-# TODO(lluc): point at your registry, e.g. "docker.io/<user>/digital-lluc:0.1"
-image = "your-registry/digital-lluc:0.1"
+image = "lluc24/digital-lluc:0.1"
 secret_set = "digital-lluc-secrets"
 
 [scaling]
