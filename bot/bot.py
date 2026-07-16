@@ -30,9 +30,32 @@ from pipecat.services.deepgram.stt import DeepgramSTTService
 from pipecat.services.openai.llm import OpenAILLMService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.transports.daily.transport import DailyParams
+from pipecat.transports.smallwebrtc.request_handler import (
+    SmallWebRTCPatchRequest,
+    SmallWebRTCRequestHandler,
+)
 from pipecat.workers.runner import WorkerRunner
 
 from persona.prompt import build_system_prompt
+
+# Workaround for a pipecat-ai 1.5.0 bug: browsers send an empty-string ICE
+# candidate as the standard trickle-ICE "end of candidates" marker, but
+# aiortc's candidate_from_sdp() asserts on it instead of ignoring it, 500ing
+# every ICE PATCH (surfaces client-side as "NetworkError when attempting to
+# fetch resource"). Strip empty candidates before handing off to pipecat.
+_original_handle_patch_request = SmallWebRTCRequestHandler.handle_patch_request
+
+
+async def _handle_patch_request_skip_empty_candidates(
+    self, request: SmallWebRTCPatchRequest
+):
+    request.candidates = [c for c in request.candidates if c.candidate]
+    await _original_handle_patch_request(self, request)
+
+
+SmallWebRTCRequestHandler.handle_patch_request = (
+    _handle_patch_request_skip_empty_candidates
+)
 
 MAX_SESSION_SECS = int(os.environ.get("MAX_SESSION_SECS", "600"))
 IDLE_TIMEOUT_SECS = int(os.environ.get("IDLE_TIMEOUT_SECS", "120"))

@@ -9,3 +9,4 @@ web.log
 .mcp.json
 .claude/
 .vscode/
+local/
