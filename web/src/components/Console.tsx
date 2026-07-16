@@ -216,7 +216,7 @@ export default function Console() {
         await c.connect(
           info.transport === "daily"
             ? { url: info.room_url, token: info.token }
-            : { webrtcUrl: info.webrtc_url },
+            : { webrtcRequestParams: { endpoint: info.webrtc_url } },
         );
         return c;
       };
