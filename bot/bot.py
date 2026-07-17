@@ -81,10 +81,7 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
         settings=CartesiaTTSService.Settings(voice=tts_voice),
     )
 
-    # OpenAI caches long, repeated prompt prefixes automatically (no opt-in
-    # flag) once they exceed ~1024 tokens, so the system prompt as the first
-    # context message is enough to get caching.
-    llm_model = os.environ.get("OPENAI_MODEL") or "gpt-5-mini"
+    llm_model = os.environ.get("OPENAI_MODEL") or "gpt-4o-mini"
     llm = OpenAILLMService(
         api_key=os.environ["OPENAI_API_KEY"],
         settings=OpenAILLMService.Settings(model=llm_model),
