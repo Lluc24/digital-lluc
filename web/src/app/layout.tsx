@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -22,7 +23,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <Navbar />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

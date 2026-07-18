@@ -18,7 +18,7 @@ export default async function BlogPost({
     <main className="max-w-2xl mx-auto px-4 py-10">
       <p className="text-sm mb-6">
         <Link href="/blog" className="text-accent hover:underline">
-          ~/blog
+          /blog
         </Link>
         /{post.meta.slug}
       </p>
