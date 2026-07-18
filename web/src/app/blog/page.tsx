@@ -7,12 +7,7 @@ export default function BlogIndex() {
   const posts = listPosts();
   return (
     <main className="max-w-2xl mx-auto px-4 py-10 space-y-6">
-      <h1 className="text-lg font-bold">
-        <Link href="/" className="text-accent hover:underline">
-          ~
-        </Link>
-        /blog
-      </h1>
+      <h1 className="text-lg font-bold">/blog</h1>
       {posts.length === 0 && (
         <p className="text-dim text-sm">
           Nothing here yet — the first post is being written. Meanwhile,{" "}
