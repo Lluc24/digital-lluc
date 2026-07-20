@@ -1,37 +1,24 @@
 @import "tailwindcss";
 
+/* Adwaita (GNOME/Ubuntu) light palette */
 :root {
-  --background: #0b0f0c;
-  --surface: #10161200;
-  --panel: #0f1511;
-  --border: #1f2a22;
-  --foreground: #d7e0d9;
-  --dim: #7d8f83;
-  --accent: #7ee787;
-  --accent-dim: #3fb950;
-  --amber: #e3b341;
-  --user: #79c0ff;
-  --danger: #ff7b72;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #f6f8f6;
-    --panel: #ffffff;
-    --border: #d9e2da;
-    --foreground: #1c2620;
-    --dim: #5d6f63;
-    --accent: #1a7f37;
-    --accent-dim: #2da44e;
-    --amber: #9a6700;
-    --user: #0969da;
-    --danger: #cf222e;
-  }
+  --background: #fafafa;
+  --panel: #ffffff;
+  --headerbar: #ebebeb;
+  --border: #d3d3d3;
+  --foreground: #241f31;
+  --dim: #77767b;
+  --accent: #e95420;
+  --accent-dim: #c34113;
+  --amber: #e5a50a;
+  --user: #1c71d8;
+  --danger: #e01b24;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-panel: var(--panel);
+  --color-headerbar: var(--headerbar);
   --color-edge: var(--border);
   --color-foreground: var(--foreground);
   --color-dim: var(--dim);
@@ -40,14 +27,14 @@
   --color-amber: var(--amber);
   --color-user: var(--user);
   --color-danger: var(--danger);
-  --font-sans: var(--font-geist-mono);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ubuntu-mono);
+  --font-mono: var(--font-ubuntu-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-ubuntu-mono), ui-monospace, monospace;
 }
 
 ::selection {

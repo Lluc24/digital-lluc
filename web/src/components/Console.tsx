@@ -281,28 +281,34 @@ export default function Console() {
       : "idle";
 
   return (
-    <section className="w-full max-w-3xl flex flex-col flex-1 min-h-[70vh] rounded-lg border border-edge bg-panel overflow-hidden shadow-lg">
-      {/* Title bar */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-edge text-xs text-dim">
-        <div className="flex items-center gap-2">
-          <span className="flex gap-1.5">
-            <i className="w-2.5 h-2.5 rounded-full bg-danger inline-block" />
-            <i className="w-2.5 h-2.5 rounded-full bg-amber inline-block" />
-            <i className="w-2.5 h-2.5 rounded-full bg-accent-dim inline-block" />
+    <section className="w-full max-w-3xl flex flex-col flex-1 min-h-[70vh] rounded-lg border border-edge bg-panel overflow-hidden shadow-md">
+      {/* Header bar */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-edge bg-headerbar text-xs text-dim">
+        <span>digital-lluc — pipecat session</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span
+              className={`w-2 h-2 rounded-full inline-block ${
+                connected
+                  ? "bg-accent"
+                  : connecting
+                    ? "bg-amber pulse-dot"
+                    : "bg-dim"
+              }`}
+            />
+            <span>{statusLabel}</span>
+          </div>
+          <span className="flex gap-1">
+            <i className="w-5 h-5 rounded-full flex items-center justify-center leading-none text-foreground/70 hover:bg-foreground/10 transition-colors">
+              &#8722;
+            </i>
+            <i className="w-5 h-5 rounded-full flex items-center justify-center leading-none text-foreground/70 hover:bg-foreground/10 transition-colors">
+              &#9633;
+            </i>
+            <i className="w-5 h-5 rounded-full flex items-center justify-center leading-none text-foreground/70 hover:bg-danger hover:text-white transition-colors">
+              &#10005;
+            </i>
           </span>
-          <span className="ml-2">digital-lluc — pipecat session</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={`w-2 h-2 rounded-full inline-block ${
-              connected
-                ? "bg-accent"
-                : connecting
-                  ? "bg-amber pulse-dot"
-                  : "bg-dim"
-            }`}
-          />
-          <span>{statusLabel}</span>
         </div>
       </div>
 
