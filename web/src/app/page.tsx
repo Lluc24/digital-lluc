@@ -4,7 +4,6 @@ const LINKS = [
   { label: "github", href: "https://github.com/Lluc24" },
   { label: "linkedin", href: "https://linkedin.com/in/lluc-santamaria/" },
   { label: "email", href: "mailto:lluc.santa@gmail.com" },
-  { label: "linktree", href: "https://linktr.ee/lluc_santamaria" },
 ];
 
 export default function Home() {
