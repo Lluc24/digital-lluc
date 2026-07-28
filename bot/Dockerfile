@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir uv \
     && pip install --no-cache-dir -r requirements.txt
 
 COPY bot/bot.py bot.py
+COPY bot/storage.py storage.py
 COPY bot/persona/ persona/
 COPY profile/ profile/
 
