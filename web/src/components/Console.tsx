@@ -34,7 +34,7 @@ const BANNER = String.raw`  o'')}____//   lluc-code v1.0
    (_(_/-(_/    cwd: ~/lluc`;
 
 const BOOT_LINES = [
-  "> /wake digital-lluc",
+  "> ./lluc.sh",
   "● Loading persona from BACKGROUND.yaml… done.",
   "● Hi — I'm an AI version of Lluc. Ask me about his work, his projects, or what he does off the clock.",
   "● Type below, or enable [mic] to talk out loud.",
