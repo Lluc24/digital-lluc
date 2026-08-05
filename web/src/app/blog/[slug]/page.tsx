@@ -6,6 +6,26 @@ export function generateStaticParams() {
   return listPosts().map((p) => ({ slug: p.slug }));
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const post = getPost(slug);
+  if (!post) return {};
+  return {
+    title: `${post.meta.title} — Lluc Santamaria`,
+    description: post.meta.summary,
+    openGraph: {
+      type: "article",
+      title: post.meta.title,
+      description: post.meta.summary,
+      publishedTime: post.meta.date || undefined,
+    },
+  };
+}
+
 export default async function BlogPost({
   params,
 }: {
