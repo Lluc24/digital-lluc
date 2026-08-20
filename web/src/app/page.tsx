@@ -16,7 +16,7 @@ export default function Home() {
               Lluc Santamaria Riba
             </h1>
             <p className="text-sm text-dim">
-              Incoming AI Engineer @ Prosper AI · voice agents that talk to
+              Associate AI Engineer @ Prosper AI · voice agents that talk to
               real people, in real time
             </p>
           </div>

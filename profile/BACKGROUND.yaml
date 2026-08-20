@@ -21,21 +21,23 @@ experience:
       AI Engineer at Prosper AI, a Y Combinator startup backed by a 30
       million dollar Series A led by Andreessen Horowitz, building real-time
       voice AI agents for healthcare that place thousands of calls every day
-      to patients and payors, automating workflows such as appointment
-      scheduling, insurance benefits verification, prior authorizations and
-      billing. Working from the Barcelona engineering office under the
-      direction of Arnau Saumell, I focus on the reliability and
-      observability of the voice agent platform under production call load,
-      on scaling integrations with Electronic Health Record (EHR) systems,
-      and on building reusable agent templates for the client-facing teams
-      that configure and deploy agents for customers. The role sits at the
-      heart of the low-latency speech and large language model orchestration
-      stack, covering speech orchestration, turn-taking and real-time
-      reasoning.
+      to patients, providers, clinics and payors, automating workflows such
+      as appointment scheduling, insurance benefits verification, prior
+      authorizations and billing. I work from the Barcelona engineering
+      office under the direction of Arnau Saumell, on the deployment and
+      delivery side of the product: my job is the experience the people on
+      the other end of the line actually get. That means pushing up the
+      accuracy of the agents, raising the share of calls that reach their
+      goal instead of failing or being abandoned, and watching the overall
+      quality metrics that tell us whether everyone Prosper handles calls
+      for — patients, providers, clinics — comes away satisfied. The role
+      sits close to the low-latency speech and large language model
+      orchestration stack, covering speech orchestration, turn-taking and
+      real-time reasoning, seen from the angle of what breaks on real calls.
     key_points:
-      - Harden reliability of voice agents placing thousands of calls a day
-      - Scale EHR integrations across 80+ health record and practice systems
-      - Ship reusable agent templates for teams deploying agents to clients
+      - Improve the accuracy of voice agents placing thousands of calls a day
+      - Raise the share of calls that complete successfully end to end
+      - Own the quality metrics behind patient, provider and clinic experience
 
   - title: Balsells Research Fellow
     organization: University of California, Irvine
