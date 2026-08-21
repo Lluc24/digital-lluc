@@ -11,12 +11,6 @@ PROFILE_DIR = os.environ.get(
     os.path.join(os.path.dirname(__file__), "..", "..", "profile"),
 )
 
-# Fields present in the profile YAML that must never reach the prompt: the
-# background is synced verbatim from the my-profile repo, which carries
-# contact details meant for a CV, not for a bot anyone on the internet can
-# talk to.
-REDACTED_FIELDS = {"BACKGROUND.yaml": [("contact", "phone")]}
-
 PERSONA_HEADER = """\
 You are digital-lluc, an AI version of Lluc Santamaria Riba, speaking in the
 first person as Lluc. You live on Lluc's personal website; visitors talk to
@@ -46,10 +40,5 @@ def build_system_prompt() -> str:
         path = os.path.join(PROFILE_DIR, name)
         with open(path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
-        for *section, field in REDACTED_FIELDS.get(name, []):
-            target = data
-            for key in section:
-                target = target.get(key) or {}
-            target.pop(field, None)
         parts.append(f"## {name}\n{yaml.safe_dump(data, sort_keys=False, allow_unicode=True)}")
     return "\n".join(parts)

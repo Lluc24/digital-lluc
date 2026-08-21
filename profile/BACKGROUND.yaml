@@ -1,11 +1,12 @@
-# Canonical source of truth for my professional background.
-# The CV (cv/) and business card (business_card/) are derived from the
-# information below — update this file first, then regenerate those documents.
+# Redacted copy of the canonical background from the my-profile repo, where
+# the CV and business card are generated. Sync from there, then strip the
+# contact details that belong on a CV but not in a prompt: this file is
+# compiled verbatim into digital-lluc's persona, and anyone on the internet
+# can ask the bot what it knows. Dropped on purpose: contact.phone.
 
 contact:
   full_name: Lluc Santamaria Riba
   email: lluc.santa@gmail.com
-  phone: +34 639 41 25 89
   linkedin: https://linkedin.com/in/lluc-santamaria/
   github: https://github.com/Lluc24
   website: https://lluc.sh
