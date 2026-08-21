@@ -48,8 +48,9 @@ available:
   Cartesia (TTS) pipeline, persona compiled from `profile/`, hard
   session/idle timeouts.
 - `profile/` — the canonical background YAML the persona is built from
-  (`BACKGROUND.yaml` synced from the my-profile repo, plus
-  `PERSONAL.yaml` for everything off the clock).
+  (`BACKGROUND.yaml` synced from the my-profile repo, with the CV-only
+  contact details stripped, plus `PERSONAL.yaml` for everything off the
+  clock).
 
 ## Local development
 

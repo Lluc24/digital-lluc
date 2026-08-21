@@ -1,13 +1,15 @@
-# Canonical source of truth for my professional background.
-# The CV (cv/) and business card (business_card/) are derived from the
-# information below — update this file first, then regenerate those documents.
+# Redacted copy of the canonical background from the my-profile repo, where
+# the CV and business card are generated. Sync from there, then strip the
+# contact details that belong on a CV but not in a prompt: this file is
+# compiled verbatim into digital-lluc's persona, and anyone on the internet
+# can ask the bot what it knows. Dropped on purpose: contact.phone.
 
 contact:
   full_name: Lluc Santamaria Riba
   email: lluc.santa@gmail.com
   linkedin: https://linkedin.com/in/lluc-santamaria/
   github: https://github.com/Lluc24
-  personal_hub: https://linktr.ee/lluc_santamaria
+  website: https://lluc.sh
 
 experience:
   - title: Associate AI Engineer
@@ -19,23 +21,27 @@ experience:
     location_type: Hybrid
     description: >
       AI Engineer at Prosper AI, a Y Combinator startup backed by a 30
-      million dollar Series A led by Andreessen Horowitz, building real-time
-      voice AI agents for healthcare that place thousands of calls every day
-      to patients and payors, automating workflows such as appointment
-      scheduling, insurance benefits verification, prior authorizations and
-      billing. Working from the Barcelona engineering office under the
-      direction of Arnau Saumell, I focus on the reliability and
-      observability of the voice agent platform under production call load,
-      on scaling integrations with Electronic Health Record (EHR) systems,
-      and on building reusable agent templates for the client-facing teams
-      that configure and deploy agents for customers. The role sits at the
-      heart of the low-latency speech and large language model orchestration
-      stack, covering speech orchestration, turn-taking and real-time
-      reasoning.
+      million dollar Series A led by Andreessen Horowitz, building
+      real-time voice AI agents for healthcare that place thousands of
+      calls every day to patients and payors, automating workflows such
+      as appointment scheduling, insurance benefits verification, prior
+      authorizations and billing. Working from the Barcelona engineering
+      office, I am part of the core tech team, on the deployment and
+      delivery side of the platform: where voice agents are configured,
+      shipped to customers and kept working on live call traffic. I
+      raise the metrics that decide whether those calls work — agent
+      accuracy, and the share of calls that reach a successful outcome
+      instead of failing, stalling or handing back to a human. I
+      root-cause the calls that fail or degrade and ship the fix on live
+      production traffic, so that patients, providers, clinics and
+      payors get calls that do what they were meant to do. The work sits
+      close to the low-latency speech and large language model
+      orchestration stack, covering speech orchestration, turn-taking
+      and real-time reasoning.
     key_points:
-      - Harden reliability of voice agents placing thousands of calls a day
-      - Scale EHR integrations across 80+ health record and practice systems
-      - Ship reusable agent templates for teams deploying agents to clients
+      - Raise agent accuracy and the share of calls ending in a successful outcome
+      - Root-cause failing and degraded calls, then ship the fix to live traffic
+      - Move call quality metrics for patients, providers, clinics and payors
 
   - title: Balsells Research Fellow
     organization: University of California, Irvine
