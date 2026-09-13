@@ -4,7 +4,12 @@ version = "0.1.0"
 description = "digital-lluc — the voice/text agent behind Lluc's website"
 requires-python = ">=3.12"
 dependencies = [
-    "pipecat-ai[openai,cartesia,deepgram,silero,daily,webrtc,runner]~=1.6.0",
+    "pipecat-ai[openai,cartesia,deepgram,silero,daily,webrtc,runner]~=1.10.0",
+    # pipecat 1.10 widened its openai floor to <4. openai 3 swaps httpx for
+    # httpx2, which verifies TLS against the OS trust store instead of certifi
+    # — untested on the pipecat-base image the bot deploys from, so stay on the
+    # 2.x HTTP stack until that move is made on its own.
+    "openai<3",
     "pyyaml~=6.0",
     "httpx~=0.28",
     "vercel~=0.7",
