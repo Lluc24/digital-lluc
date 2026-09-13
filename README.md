@@ -3,7 +3,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js_16-black?logo=nextdotjs)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Python](https://img.shields.io/badge/Python_3.13-3776AB?logo=python&logoColor=white)
-![Pipecat](https://img.shields.io/badge/Pipecat-1.5.0-7ee787)
+![Pipecat](https://img.shields.io/badge/Pipecat-1.10.0-7ee787)
 ![uv](https://img.shields.io/badge/uv-managed-DE5FE9?logo=uv&logoColor=white)
 ![Status](https://img.shields.io/badge/status-pre--launch-e3b341)
 
@@ -55,7 +55,7 @@ available:
 ## Local development
 
 ```bash
-# bot (terminal 1) — uv-managed (Python >= 3.13, pipecat 1.5.0)
+# bot (terminal 1) — uv-managed (Python >= 3.13, pipecat 1.10.0)
 cd bot && uv sync
 cp .env.example .env   # fill DEEPGRAM_API_KEY, OPENAI_API_KEY, CARTESIA_API_KEY
 uv run bot.py --transport webrtc --port 7080

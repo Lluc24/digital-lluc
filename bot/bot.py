@@ -93,13 +93,14 @@ async def run_bot(transport: BaseTransport, runner_args: RunnerArguments):
     llm_model = os.environ.get("OPENAI_MODEL") or "gpt-4o-mini"
     llm = OpenAILLMService(
         api_key=os.environ["OPENAI_API_KEY"],
-        settings=OpenAILLMService.Settings(model=llm_model),
+        settings=OpenAILLMService.Settings(
+            model=llm_model,
+            system_instruction=build_system_prompt(),
+        ),
     )
     logger.info(f"🧠 LLM: OpenAI {llm_model}")
 
-    context = LLMContext(
-        messages=[{"role": "system", "content": build_system_prompt()}]
-    )
+    context = LLMContext()
     user_aggregator, assistant_aggregator = LLMContextAggregatorPair(
         context,
         user_params=LLMUserAggregatorParams(vad_analyzer=SileroVADAnalyzer()),
