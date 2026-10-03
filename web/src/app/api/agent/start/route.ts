@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { checkAndCountSession } from "@/lib/usage";
+import { checkAndCountSession, refundSession, type UsageGate } from "@/lib/usage";
 
 const PIPECAT_CLOUD_START_URL = "https://api.pipecat.daily.co/v1/public";
 
@@ -15,6 +15,7 @@ const PIPECAT_CLOUD_START_URL = "https://api.pipecat.daily.co/v1/public";
 export async function POST() {
   const devAnonymous = process.env.DEV_ALLOW_ANONYMOUS === "1";
   let userId: string | null = null;
+  let gate: UsageGate | null = null;
 
   if (!devAnonymous) {
     const session = await auth();
@@ -23,7 +24,7 @@ export async function POST() {
       console.warn("🔒 /api/agent/start: auth required, no session");
       return NextResponse.json({ error: "auth_required" }, { status: 401 });
     }
-    const gate = await checkAndCountSession(userId);
+    gate = await checkAndCountSession(userId);
     if (!gate.allowed) {
       console.warn(`🚫 /api/agent/start: cap exceeded for ${userId} (${gate.used}/${gate.cap})`);
       return NextResponse.json(
@@ -45,21 +46,29 @@ export async function POST() {
   }
 
   console.info(`🚀 /api/agent/start: starting Pipecat Cloud agent "${agentName}" for ${userId ?? "anonymous"}`);
-  const res = await fetch(`${PIPECAT_CLOUD_START_URL}/${agentName}/start`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      createDailyRoom: true,
-      body: { user: userId },
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${PIPECAT_CLOUD_START_URL}/${agentName}/start`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        createDailyRoom: true,
+        body: { user: userId },
+      }),
+    });
+  } catch (err) {
+    console.error("❌ pipecat cloud start unreachable:", err);
+    if (gate) await refundSession(gate);
+    return NextResponse.json({ error: "agent_unavailable" }, { status: 502 });
+  }
 
   if (!res.ok) {
     const detail = await res.text();
     console.error("❌ pipecat cloud start failed:", res.status, detail);
+    if (gate) await refundSession(gate);
     return NextResponse.json({ error: "agent_unavailable" }, { status: 502 });
   }
 
