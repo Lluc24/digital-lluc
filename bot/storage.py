@@ -31,32 +31,62 @@ def _redis_config() -> tuple[str, str] | None:
 
 
 async def upload_blob(path: str, data: bytes, content_type: str) -> str | None:
-    """Uploads bytes to a private Vercel Blob at `path`, returning its pathname (or None if unconfigured)."""
+    """Uploads bytes to a private Vercel Blob at `path`, returning its pathname.
+
+    Returns None if Blob is unconfigured or the upload fails. A failed upload
+    is logged, not raised, so one bad upload cannot stop the rest of the
+    session from being saved.
+    """
     if not _blob_configured():
         logger.warning("⚠️ storage: BLOB_READ_WRITE_TOKEN not set, skipping upload of " + path)
         return None
 
-    result = await put_async(path, data, access="private", content_type=content_type)
+    try:
+        result = await put_async(path, data, access="private", content_type=content_type)
+    except Exception as exc:
+        logger.error(f"❌ storage: upload of {path} failed: {exc!r}")
+        return None
     logger.info(f"📦 storage: uploaded {path} ({len(data)} bytes)")
     return result.pathname
 
 
-async def record_session(session_id: str, record: dict) -> None:
-    """Writes a session's metadata as a Redis hash and indexes it by time (no-op if Redis unconfigured)."""
+async def record_session(
+    session_id: str, record: dict, *, client: httpx.AsyncClient | None = None
+) -> bool:
+    """Writes a session's metadata as a Redis hash and indexes it by time.
+
+    Returns True once both writes succeeded. Returns False (no-op) if Redis is
+    unconfigured, and False if a write fails. The index entry is only added
+    after the hash is stored, so the admin list never points at a session with
+    no data. Errors are logged, not raised, so a Redis outage does not crash
+    session cleanup.
+    """
     config = _redis_config()
     if not config:
         logger.warning(f"⚠️ storage: Upstash Redis not configured, skipping session record for {session_id}")
-        return
+        return False
     url, token = config
 
     hset_fields: list[str] = []
     for key, value in record.items():
         hset_fields.extend([key, str(value)])
 
-    async with httpx.AsyncClient() as client:
-        headers = {"authorization": f"Bearer {token}"}
-        await client.post(url, headers=headers, json=["HSET", f"session:{session_id}", *hset_fields])
-        await client.post(
+    headers = {"authorization": f"Bearer {token}"}
+    owns_client = client is None
+    if client is None:
+        client = httpx.AsyncClient(timeout=10.0)
+    try:
+        res = await client.post(url, headers=headers, json=["HSET", f"session:{session_id}", *hset_fields])
+        res.raise_for_status()
+        res = await client.post(
             url, headers=headers, json=["ZADD", SESSIONS_INDEX_KEY, str(time.time()), session_id]
         )
+        res.raise_for_status()
+    except httpx.HTTPError as exc:
+        logger.error(f"❌ storage: recording session {session_id} failed: {exc!r}")
+        return False
+    finally:
+        if owns_client:
+            await client.aclose()
     logger.info(f"🗂️ storage: recorded session {session_id}")
+    return True
