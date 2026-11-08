@@ -29,6 +29,7 @@ from digital_lluc.local import (
     create_local_runner_client,
 )
 from digital_lluc.pipecat_cloud import PipecatCloudLauncher, create_pipecat_cloud_client
+from digital_lluc.sentry import init_sentry
 from digital_lluc.upstash import UpstashUsageCounter, create_upstash_client
 
 _BEARER_PREFIX = "Bearer "
@@ -40,6 +41,7 @@ class _BaseApiSettings(BaseSettings):
 
     auth_token_secret: SecretStr = Field(min_length=32)
     daily_session_cap: PositiveInt = 5
+    sentry_dsn: SecretStr | None = None
 
 
 class CloudApiSettings(_BaseApiSettings):
@@ -132,6 +134,8 @@ def _adapters(
 
 
 def create_app(settings: CloudApiSettings | LocalApiSettings) -> FastAPI:
+    if settings.sentry_dsn is not None:
+        init_sentry(settings.sentry_dsn)
     usage_counter, agent_launcher, http_clients = _adapters(settings)
 
     @asynccontextmanager

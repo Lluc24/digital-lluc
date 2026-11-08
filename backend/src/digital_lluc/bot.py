@@ -50,6 +50,7 @@ from digital_lluc.domain import (
 )
 from digital_lluc.persona import ProfileDocument, compose_system_prompt
 from digital_lluc.recordings import LocalDirectoryRecordingStore, VercelBlobRecordingStore
+from digital_lluc.sentry import init_sentry
 
 _PROFILE_FILE_NAMES = ("BACKGROUND.yaml", "PERSONAL.yaml")
 _RECORDING_SAMPLE_RATE_HZ = 16000
@@ -68,6 +69,7 @@ class _BaseBotSettings(BaseSettings):
     max_session_seconds: PositiveInt = 600
     idle_timeout_seconds: PositiveInt = 120
     profile_dir: DirectoryPath = Path("profile")
+    sentry_dsn: SecretStr | None = None
 
 
 class CloudBotSettings(_BaseBotSettings):
@@ -275,6 +277,8 @@ _TRANSPORT_PARAMS: dict[str, Callable[[], TransportParams]] = {
 async def bot(runner_args: RunnerArguments) -> None:
     """Entry point for both the local runner and Pipecat Cloud."""
     settings = load_settings()
+    if settings.sentry_dsn is not None:
+        init_sentry(settings.sentry_dsn)
     request = parse_session_request(runner_args.body)
     transport = await create_transport(runner_args, _TRANSPORT_PARAMS)
     await run_session(transport, request, settings, handle_sigint=runner_args.handle_sigint)
