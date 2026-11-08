@@ -1,0 +1,39 @@
+name: Deploy bot
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - backend/src/**
+      - backend/pyproject.toml
+      - backend/Dockerfile
+      - pyproject.toml
+      - uv.lock
+      - profile/**
+      - .dockerignore
+      - .github/workflows/deploy-bot.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-bot
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: daily-co/pipecat-cloud-deploy-action@v2
+        with:
+          api-key: ${{ secrets.PCC_API_KEY }}
+          agent-name: digital-lluc
+          cloud-build: true
+          build-context: .
+          dockerfile: backend/Dockerfile
+          secret-set: digital-lluc-secrets
+          region: us-west
+          min-agents: 0
+          max-agents: 3
+          max-session-duration: 900
