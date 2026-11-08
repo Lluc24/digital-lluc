@@ -1,0 +1,10 @@
+**/.venv
+**/node_modules
+**/.env
+**/.env.*
+**/__pycache__
+.git
+web
+bot
+frontend
+recordings

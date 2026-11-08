@@ -55,3 +55,50 @@ def usage_day(now: datetime) -> date:
 def is_within_daily_cap(sessions_started_today: int, sessions_per_day: int) -> bool:
     """Pre: sessions_started_today already counts the session being started."""
     return sessions_started_today <= sessions_per_day
+
+
+class RecordingStoreError(Exception):
+    pass
+
+
+@dataclass(frozen=True)
+class TokenUsage:
+    prompt_tokens: int
+    completion_tokens: int
+
+    def plus(self, other: "TokenUsage") -> "TokenUsage":
+        return TokenUsage(
+            prompt_tokens=self.prompt_tokens + other.prompt_tokens,
+            completion_tokens=self.completion_tokens + other.completion_tokens,
+        )
+
+
+NO_TOKEN_USAGE = TokenUsage(prompt_tokens=0, completion_tokens=0)
+
+
+@dataclass(frozen=True)
+class TranscriptTurn:
+    role: str
+    text: str
+
+
+@dataclass(frozen=True)
+class SessionAudio:
+    pcm16_frames: bytes
+    sample_rate_hz: int
+    channel_count: int
+
+
+@dataclass(frozen=True)
+class SessionRecording:
+    request: SessionRequest
+    started_at: datetime
+    ended_at: datetime
+    token_usage: TokenUsage
+    transcript: tuple[TranscriptTurn, ...]
+    audio: SessionAudio | None
+    """None for a text-only session, where no audio ever reached the recorder."""
+
+    @property
+    def duration_seconds(self) -> int:
+        return round((self.ended_at - self.started_at).total_seconds())

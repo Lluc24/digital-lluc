@@ -1,0 +1,7 @@
+agent_name = "digital-lluc"
+image = "lluc24/digital-lluc:0.4"
+secret_set = "digital-lluc-secrets"
+
+[scaling]
+min_agents = 0
+max_agents = 3
