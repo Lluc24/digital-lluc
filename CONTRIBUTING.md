@@ -4,3 +4,4 @@
 - PR body: a one-line summary, a What section, a Why section; plain English, at most 15 lines.
 - `make check` passes locally (pre-commit hook, enabled by `make setup`) and in CI.
 - Merge is squash only; the branch is deleted on merge.
+- Repo settings live in `.github/rulesets` and `make repo-bootstrap`; change them there, not in the GitHub UI.
