@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|refactor|perf|build|ci|docs|chore|revert)(\([a-z0-9-]+\))?!?: .+'
+          if ! printf '%s' "$PR_TITLE" | grep -Eq "$pattern"; then
+            echo "PR title must be a Conventional Commit, e.g. 'feat(backend): start sessions'. Got: $PR_TITLE"
+            exit 1
+          fi
+
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --locked
+      - run: uv run ruff format --check
+      - run: uv run ruff check
+      - run: uv run mypy backend/src

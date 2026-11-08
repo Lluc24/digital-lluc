@@ -1,7 +1,10 @@
 .env
 .env.local
 .env*.local
-bot/.venv/
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
 __pycache__/
 *.pyc
 bot.log
