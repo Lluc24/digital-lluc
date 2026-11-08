@@ -1,3 +1,4 @@
+import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -6,4 +7,15 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ["**.ts.net"],
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  telemetry: false,
+  silent: true,
+  sourcemaps: { disable: true },
+  bundleSizeOptimizations: {
+    excludeTracing: true,
+    excludeDebugStatements: true,
+    excludeReplayIframe: true,
+    excludeReplayShadowDom: true,
+    excludeReplayWorker: true,
+  },
+});

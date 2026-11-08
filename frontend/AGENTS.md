@@ -4,7 +4,7 @@ This is NOT the Next.js you know: read `node_modules/next/dist/docs/` before usi
 
 - Start flat in src/; `src/app/` holds only routes. Split into folders only when concrete code needs it.
 - Pure modules (session.ts, blog-post.ts) stay free of React, fetch and fs.
-- I/O lives in named modules: env.ts (server env, parsed with zod), session-api.ts (server → backend), session-client.ts (browser → /api/sessions), blog.ts (content/blog). Every response and file is parsed with zod.
+- I/O lives in named modules: env.ts (server env, parsed with zod), sentry-options.ts (public Sentry DSN, parsed with zod), session-api.ts (server → backend), session-client.ts (browser → /api/sessions), blog.ts (content/blog). Every response and file is parsed with zod.
 - The look is Liquid Glass: reuse `glassClassName`/`pressableClassName` from glass.ts and the theme tokens in globals.css; no one-off colors.
 - No `any`, no non-null `!`, no `as` casts except `as const`: biome rejects them. `pnpm check` (biome ci, tsc) and `pnpm build` pass before commit.
 
