@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING, cast  # noqa: TID251 sentry_sdk: before_send m
 
 import sentry_sdk
 from pydantic import SecretStr
-from starlette.types import ASGIApp, Receive, Scope, Send
+from sentry_sdk.utils import event_from_exception
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 if TYPE_CHECKING:
     from sentry_sdk._types import Breadcrumb, BreadcrumbHint, Event, Hint
@@ -56,20 +57,37 @@ def init_sentry(dsn: SecretStr) -> None:
     )
 
 
+async def _flush() -> None:
+    await asyncio.to_thread(sentry_sdk.flush, _FLUSH_TIMEOUT_SECONDS)
+
+
+def _capture_unhandled(error: Exception) -> None:
+    event, hint = event_from_exception(
+        error,
+        client_options=sentry_sdk.get_client().options,
+        mechanism={"type": "asgi", "handled": False},
+    )
+    sentry_sdk.capture_event(event, hint=hint)
+
+
 class FlushSentryMiddleware:
-    """Sends queued events before the request ends, because Vercel freezes the function once it
-    responds and the background sender would never run."""
+    """Sends queued events before the response finishes, because Vercel freezes the function once
+    it responds and the background sender would never run."""
 
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        async def flush_then_send(message: Message) -> None:
+            if message["type"] == "http.response.body" and not message.get("more_body", False):
+                await _flush()
+            await send(message)
+
         try:
-            await self.app(scope, receive, send)
+            await self.app(scope, receive, flush_then_send)
         except Exception as error:
-            # Unhandled errors are otherwise captured only above this middleware, after the flush.
-            # Sentry's dedupe drops that second capture of the same exception.
-            sentry_sdk.capture_exception(error)
+            # Sentry's own capture sits above this middleware, after the 500 is sent; its dedupe
+            # drops that second capture of the same exception.
+            _capture_unhandled(error)
+            await _flush()
             raise
-        finally:
-            await asyncio.to_thread(sentry_sdk.flush, _FLUSH_TIMEOUT_SECONDS)
