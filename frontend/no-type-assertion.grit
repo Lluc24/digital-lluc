@@ -1,0 +1,7 @@
+or {
+  `$value as $type`,
+  TsTypeAssertionExpression()
+} as $assertion where {
+  not $assertion <: `$_ as const`,
+  register_diagnostic(span=$assertion, message="No type assertions: parse the value into its type instead.", severity="error")
+}

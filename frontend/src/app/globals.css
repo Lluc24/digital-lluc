@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--font-inter),
+    system-ui, sans-serif;
+  --font-mono: "SF Mono", ui-monospace, Menlo, monospace;
+  --color-night: #05060f;
+  --animate-drift: drift 18s ease-in-out infinite;
+
+  @keyframes drift {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(6vw, 4vh) scale(1.15);
+    }
+  }
+}
+
+@utility prose-glass {
+  @apply flex flex-col gap-4 leading-relaxed text-night/85 dark:text-white/85;
+
+  & h2 {
+    @apply mt-6 font-bold text-2xl tracking-tight text-night dark:text-white;
+  }
+  & h3 {
+    @apply mt-4 font-semibold text-xl text-night dark:text-white;
+  }
+  & a {
+    @apply underline decoration-violet-400 underline-offset-4 hover:text-night dark:hover:text-white;
+  }
+  & ul {
+    @apply list-disc pl-6;
+  }
+  & ol {
+    @apply list-decimal pl-6;
+  }
+  & code {
+    @apply rounded-md bg-night/10 px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/10;
+  }
+  & pre {
+    @apply overflow-x-auto rounded-2xl bg-night/10 p-4 dark:bg-white/10;
+  }
+  & pre code {
+    @apply bg-transparent p-0;
+  }
+  & blockquote {
+    @apply border-l-2 border-violet-400 pl-4 italic;
+  }
+}
