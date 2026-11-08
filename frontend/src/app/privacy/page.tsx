@@ -40,6 +40,10 @@ export default function Privacy() {
           OpenAI (language model) and Cartesia (text-to-speech), under their own
           privacy policies.
         </p>
+        <p>
+          Backend errors are reported to Sentry (error monitoring). These
+          reports collect no personal data.
+        </p>
         <h2>Personal tools</h2>
         <p>
           The same Google Cloud project is also used by my own tools, such as

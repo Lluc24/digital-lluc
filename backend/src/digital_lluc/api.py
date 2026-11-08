@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import httpx
 from fastapi import FastAPI, Header, Request, status
+from fastapi.middleware import Middleware
 from fastapi.responses import JSONResponse
 from loguru import logger
 from pydantic import BaseModel, Field, HttpUrl, PositiveInt, SecretStr
@@ -29,6 +30,7 @@ from digital_lluc.local import (
     create_local_runner_client,
 )
 from digital_lluc.pipecat_cloud import PipecatCloudLauncher, create_pipecat_cloud_client
+from digital_lluc.sentry import FlushSentryMiddleware, init_sentry
 from digital_lluc.upstash import UpstashUsageCounter, create_upstash_client
 
 _BEARER_PREFIX = "Bearer "
@@ -40,6 +42,7 @@ class _BaseApiSettings(BaseSettings):
 
     auth_token_secret: SecretStr = Field(min_length=32)
     daily_session_cap: PositiveInt = 5
+    sentry_dsn: SecretStr | None = None
 
 
 class CloudApiSettings(_BaseApiSettings):
@@ -132,6 +135,10 @@ def _adapters(
 
 
 def create_app(settings: CloudApiSettings | LocalApiSettings) -> FastAPI:
+    middleware: list[Middleware] = []
+    if settings.sentry_dsn is not None:
+        init_sentry(settings.sentry_dsn)
+        middleware.append(Middleware(FlushSentryMiddleware))
     usage_counter, agent_launcher, http_clients = _adapters(settings)
 
     @asynccontextmanager
@@ -142,7 +149,7 @@ def create_app(settings: CloudApiSettings | LocalApiSettings) -> FastAPI:
             await client.aclose()
         logger.info("🔴 session API down")
 
-    app = FastAPI(title="digital-lluc", lifespan=lifespan)
+    app = FastAPI(title="digital-lluc", lifespan=lifespan, middleware=middleware)
 
     @app.exception_handler(InvalidAuthTokenError)
     async def invalid_auth_token(_: Request, error: InvalidAuthTokenError) -> JSONResponse:
