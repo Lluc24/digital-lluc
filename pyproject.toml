@@ -32,3 +32,4 @@ warn_unreachable = true
 disallow_any_unimported = true
 disallow_any_decorated = true
 enable_error_code = ["ignore-without-code"]
+plugins = ["pydantic.mypy"]
