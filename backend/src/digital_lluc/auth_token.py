@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import jwt
-from pydantic import BaseModel, Field, SecretStr, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError
 
 from digital_lluc.domain import InvalidAuthTokenError, UserId
 
@@ -10,6 +10,9 @@ _ALGORITHM = "HS256"
 
 
 class _Claims(BaseModel):
+    # Pydantic truncates echoed inputs, which defeats Sentry's identifier scrubbing.
+    model_config = ConfigDict(hide_input_in_errors=True)
+
     sub: str = Field(min_length=1)
     exp: int
 

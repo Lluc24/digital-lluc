@@ -34,7 +34,15 @@ from pipecat.services.openai.llm import OpenAILLMService
 from pipecat.transports.base_transport import BaseTransport, TransportParams
 from pipecat.transports.daily.transport import DailyParams
 from pipecat.workers.runner import WorkerRunner
-from pydantic import BaseModel, DirectoryPath, Field, PositiveInt, SecretStr, TypeAdapter
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    DirectoryPath,
+    Field,
+    PositiveInt,
+    SecretStr,
+    TypeAdapter,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from digital_lluc.application import RecordingStore
@@ -95,6 +103,9 @@ def load_settings() -> CloudBotSettings | LocalBotSettings:
 
 
 class _SessionRequestBody(BaseModel):
+    # Pydantic truncates echoed inputs, which defeats Sentry's identifier scrubbing.
+    model_config = ConfigDict(hide_input_in_errors=True)
+
     session_id: str = Field(min_length=1)
     user_id: str = Field(min_length=1)
 

@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 _FLUSH_TIMEOUT_SECONDS = 2.0
 # User ids are login emails and session ids are UUIDs (see auth_token.py and api.py).
 _IDENTIFIER_PATTERN = re.compile(
-    r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+"
+    r"[^\s@\"<>(),;:\[\]{}]+@[^\s@\"'<>(),;:\[\]{}]+"
     r"|[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}"
 )
 _REDACTED = "[redacted]"
@@ -26,14 +26,16 @@ def scrub_identifiers(value: object) -> object:
             return _IDENTIFIER_PATTERN.sub(_REDACTED, value)
         case dict():
             return {scrub_identifiers(key): scrub_identifiers(item) for key, item in value.items()}
-        case list() | tuple():
+        case list():
             return [scrub_identifiers(item) for item in value]
+        case tuple():
+            return tuple(scrub_identifiers(item) for item in value)
         case _:
             return value
 
 
 def _scrub_event(event: "Event", _hint: "Hint") -> "Event":
-    return cast("Event", scrub_identifiers(event))
+    return cast("Event", scrub_identifiers(event))  # sentry_sdk: Event TypedDict, shape kept
 
 
 def _scrub_breadcrumb(breadcrumb: "Breadcrumb", _hint: "BreadcrumbHint") -> "Breadcrumb":
