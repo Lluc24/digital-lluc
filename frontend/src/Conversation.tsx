@@ -1,14 +1,32 @@
 "use client";
 
+import { RTVIEvent, type TransportState } from "@pipecat-ai/client-js";
+import {
+  type ConversationMessage,
+  type ConversationMessagePart,
+  isMessageEmpty,
+  PipecatClientProvider,
+  usePipecatClientAudioElement,
+  usePipecatClientMicControl,
+  usePipecatClientTransportState,
+  usePipecatConversation,
+  useRTVIClientEvent,
+} from "@pipecat-ai/client-react";
 import { signIn } from "next-auth/react";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   accentButtonClassName,
   glassClassName,
   pressableClassName,
 } from "./glass";
-import type { Turn } from "./transcript";
-import { type ConnectionStatus, useConversation } from "./useConversation";
+import { type SessionClient, useSessionClient } from "./useSessionClient";
 
 // Keeps a message typed before sign-in across the OAuth redirect.
 const UNSENT_MESSAGE_STORAGE_KEY = "digital-lluc-unsent-message";
@@ -18,6 +36,24 @@ const SUGGESTED_QUESTIONS = [
   "Why voice AI?",
   "What do you do for fun?",
 ] as const;
+
+type ConnectionStatus = "idle" | "connecting" | "online";
+
+const CONNECTION_STATUS_BY_TRANSPORT_STATE: Record<
+  TransportState,
+  ConnectionStatus
+> = {
+  disconnected: "idle",
+  initializing: "connecting",
+  initialized: "connecting",
+  authenticating: "connecting",
+  authenticated: "connecting",
+  connecting: "connecting",
+  connected: "connecting",
+  ready: "online",
+  disconnecting: "idle",
+  error: "idle",
+};
 
 const STATUS_LABEL_BY_CONNECTION: Record<ConnectionStatus, string> = {
   idle: "Ready",
@@ -55,34 +91,81 @@ function Icon({ path }: { path: string }) {
   );
 }
 
-function TurnBubble({ turn }: { turn: Turn }) {
-  switch (turn.speaker) {
-    case "visitor":
-      return (
-        <li className="flex justify-end">
-          <p
-            className={`max-w-[85%] rounded-3xl rounded-br-lg px-4 py-2.5 ${accentButtonClassName} font-normal`}
-          >
-            {turn.text}
-          </p>
-        </li>
-      );
-    case "lluc":
+function VisitorBubble({
+  children,
+  isPending = false,
+}: {
+  children: ReactNode;
+  isPending?: boolean;
+}) {
+  return (
+    <li className={`flex justify-end ${isPending ? "opacity-60" : ""}`}>
+      <p
+        className={`max-w-[85%] rounded-3xl rounded-br-lg px-4 py-2.5 ${accentButtonClassName} font-normal`}
+      >
+        {children}
+      </p>
+    </li>
+  );
+}
+
+function PartText({
+  part,
+  isVoiceOn,
+}: {
+  part: ConversationMessagePart;
+  isVoiceOn: boolean;
+}) {
+  const { text } = part;
+  const separator = part.needsSeparator ? " " : "";
+  if (text !== null && typeof text === "object" && "spoken" in text) {
+    // With voice on, text still to be spoken is dimmed; with voice off none of it is ever spoken.
+    return (
+      <>
+        {separator}
+        {text.spoken}
+        <span className={isVoiceOn ? "opacity-60" : ""}>{text.unspoken}</span>
+      </>
+    );
+  }
+  return (
+    <>
+      {separator}
+      {text}
+    </>
+  );
+}
+
+function MessageBubble({
+  message,
+  isVoiceOn,
+}: {
+  message: ConversationMessage;
+  isVoiceOn: boolean;
+}) {
+  const parts = message.parts.map((part) => (
+    <PartText
+      key={`${part.createdAt}-${part.segment_id ?? ""}`}
+      part={part}
+      isVoiceOn={isVoiceOn}
+    />
+  ));
+  switch (message.role) {
+    case "user":
+      return <VisitorBubble>{parts}</VisitorBubble>;
+    case "assistant":
       return (
         <li className="flex justify-start">
           <p
             className={`max-w-[85%] rounded-3xl rounded-bl-lg px-4 py-2.5 ${glassClassName}`}
           >
-            {turn.text}
+            {parts}
           </p>
         </li>
       );
-    case "notice":
-      return (
-        <li className="text-center text-night/60 text-sm dark:text-white/60">
-          {turn.text}
-        </li>
-      );
+    case "system":
+    case "function_call":
+      return null;
   }
 }
 
@@ -140,13 +223,38 @@ function SignInPanel({ unsentMessage }: { unsentMessage: string }) {
   );
 }
 
-export function Conversation() {
-  const botAudio = useRef<HTMLAudioElement>(null);
+type PanelProps = {
+  readonly session: SessionClient;
+  readonly connectionStatus: ConnectionStatus;
+  readonly messages: readonly ConversationMessage[];
+  readonly pendingText: string | null;
+  readonly isMicOn: boolean;
+  readonly isVoiceOn: boolean;
+  readonly onSend: (text: string) => void;
+  readonly onToggleMic: () => void;
+  readonly onToggleVoice: () => void;
+  readonly children?: ReactNode;
+};
+
+function Panel({
+  session,
+  connectionStatus,
+  messages,
+  pendingText,
+  isMicOn,
+  isVoiceOn,
+  onSend,
+  onToggleMic,
+  onToggleVoice,
+  children,
+}: PanelProps) {
   const transcriptEnd = useRef<HTMLLIElement>(null);
-  const conversation = useConversation(botAudio);
   const [draft, setDraft] = useState("");
-  const [lastSentMessage, setLastSentMessage] = useState("");
-  const { turns } = conversation.transcript;
+  const visibleMessages = messages.filter(
+    (message) => !isMessageEmpty(message),
+  );
+  const isEmpty =
+    visibleMessages.length === 0 && pendingText === null && !session.notice;
 
   useEffect(() => {
     const unsentMessage = sessionStorage.getItem(UNSENT_MESSAGE_STORAGE_KEY);
@@ -157,20 +265,19 @@ export function Conversation() {
   }, []);
 
   useEffect(() => {
-    if (turns.length > 0) {
+    if (messages.length > 0 || pendingText !== null) {
       transcriptEnd.current?.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
     }
-  }, [turns]);
+  }, [messages, pendingText]);
 
   function send(text: string) {
     const message = text.trim();
     if (message) {
       setDraft("");
-      setLastSentMessage(message);
-      void conversation.sendText(message);
+      onSend(message);
     }
   }
 
@@ -188,9 +295,9 @@ export function Conversation() {
         <span className="font-semibold">digital-lluc</span>
         <span className="flex items-center gap-2" role="status">
           <span
-            className={`size-2 rounded-full ${STATUS_DOT_CLASS_BY_CONNECTION[conversation.connectionStatus]}`}
+            className={`size-2 rounded-full ${STATUS_DOT_CLASS_BY_CONNECTION[connectionStatus]}`}
           />
-          {STATUS_LABEL_BY_CONNECTION[conversation.connectionStatus]}
+          {STATUS_LABEL_BY_CONNECTION[connectionStatus]}
         </span>
       </div>
 
@@ -198,7 +305,7 @@ export function Conversation() {
         className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-5 sm:px-6"
         aria-live="polite"
       >
-        {turns.length === 0 && (
+        {isEmpty && (
           <li className="m-auto flex max-w-md flex-col items-center gap-4 text-center">
             <p className="text-night/70 dark:text-white/70">
               Hi, I'm an AI version of Lluc. Ask me about his work, his
@@ -219,15 +326,27 @@ export function Conversation() {
             </div>
           </li>
         )}
-        {turns.map((turn) => (
-          <TurnBubble key={turn.id} turn={turn} />
+        {visibleMessages.map((message) => (
+          <MessageBubble
+            key={message.createdAt}
+            message={message}
+            isVoiceOn={isVoiceOn}
+          />
         ))}
+        {pendingText !== null && !session.isSignInRequired && (
+          <VisitorBubble isPending>{pendingText}</VisitorBubble>
+        )}
+        {session.notice && (
+          <li className="text-center text-night/60 text-sm dark:text-white/60">
+            {session.notice}
+          </li>
+        )}
         <li ref={transcriptEnd} aria-hidden="true" />
       </ol>
 
       <div className="flex flex-col gap-3 p-3 sm:p-4">
-        {conversation.isSignInRequired && (
-          <SignInPanel unsentMessage={lastSentMessage} />
+        {session.isSignInRequired && (
+          <SignInPanel unsentMessage={pendingText ?? ""} />
         )}
         <form
           onSubmit={submitDraft}
@@ -239,46 +358,178 @@ export function Conversation() {
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               placeholder={
-                conversation.isMicOn
-                  ? "Speak, or type…"
-                  : "Say hi to digital-lluc…"
+                isMicOn ? "Speak, or type…" : "Say hi to digital-lluc…"
               }
               enterKeyHint="send"
               className="w-full bg-transparent py-2 text-base outline-none placeholder:text-night/40 dark:placeholder:text-white/40"
             />
           </label>
           <ToggleButton
-            label={
-              conversation.isMicOn
-                ? "Turn microphone off"
-                : "Turn microphone on"
-            }
+            label={isMicOn ? "Turn microphone off" : "Turn microphone on"}
             iconPath={ICON_PATHS.mic}
-            isOn={conversation.isMicOn}
-            onToggle={() => void conversation.toggleMic()}
+            isOn={isMicOn}
+            onToggle={onToggleMic}
           />
           <ToggleButton
             label={
-              conversation.isVoiceOn
+              isVoiceOn
                 ? "Mute digital-lluc's voice"
                 : "Hear digital-lluc's voice"
             }
             iconPath={ICON_PATHS.speaker}
-            isOn={conversation.isVoiceOn}
-            onToggle={conversation.toggleVoice}
+            isOn={isVoiceOn}
+            onToggle={onToggleVoice}
           />
           <button
             type="submit"
             aria-label="Send"
-            disabled={draft.trim() === ""}
+            disabled={draft.trim() === "" || connectionStatus === "connecting"}
             className={`flex size-11 shrink-0 items-center justify-center rounded-full disabled:opacity-40 ${accentButtonClassName} ${pressableClassName}`}
           >
             <Icon path={ICON_PATHS.send} />
           </button>
         </form>
       </div>
-      {/* biome-ignore lint/a11y/useMediaCaption: live synthesized speech; the transcript above is its caption. */}
-      <audio ref={botAudio} autoPlay />
+      {children}
     </section>
+  );
+}
+
+function BotAudio({ isMuted }: { isMuted: boolean }) {
+  const audioRef = usePipecatClientAudioElement();
+  return <audio ref={audioRef} autoPlay muted={isMuted} />;
+}
+
+type ConversationState = {
+  readonly session: SessionClient;
+  readonly pendingText: string | null;
+  readonly isVoiceOn: boolean;
+  readonly startWithText: (text: string) => void;
+  readonly queueText: (text: string) => void;
+  readonly startWithMic: () => void;
+  readonly clearPendingText: () => void;
+  readonly toggleVoice: () => void;
+};
+
+/** Rendered under PipecatClientProvider: Pipecat's own hooks hold the transcript, audio, mic and connection state. */
+function LivePanel({ state }: { state: ConversationState }) {
+  const transportState = usePipecatClientTransportState();
+  const { messages, sendText } = usePipecatConversation();
+  const { enableMic, isMicEnabled } = usePipecatClientMicControl();
+  const { pendingText, isVoiceOn, clearPendingText } = state;
+  const isReady = transportState === "ready";
+  const [hasBotOpened, setHasBotOpened] = useState(false);
+
+  // A message sent while the bot's greeting is starting is dropped, so the queued one waits for that first turn.
+  useRTVIClientEvent(
+    RTVIEvent.BotLlmStopped,
+    useCallback(() => setHasBotOpened(true), []),
+  );
+
+  useEffect(() => {
+    if (isReady && hasBotOpened && pendingText !== null) {
+      clearPendingText();
+      void sendText(pendingText, { audio_response: isVoiceOn });
+    }
+  }, [
+    isReady,
+    hasBotOpened,
+    pendingText,
+    isVoiceOn,
+    sendText,
+    clearPendingText,
+  ]);
+
+  function send(text: string) {
+    if (isReady && hasBotOpened) {
+      void sendText(text, { audio_response: isVoiceOn });
+    } else if (
+      CONNECTION_STATUS_BY_TRANSPORT_STATE[transportState] === "idle"
+    ) {
+      state.startWithText(text);
+    } else {
+      state.queueText(text);
+    }
+  }
+
+  function toggleMic() {
+    if (!isReady) {
+      state.startWithMic();
+    } else {
+      enableMic(!isMicEnabled);
+      if (!isMicEnabled && !isVoiceOn) {
+        state.toggleVoice();
+      }
+    }
+  }
+
+  return (
+    <Panel
+      session={state.session}
+      connectionStatus={CONNECTION_STATUS_BY_TRANSPORT_STATE[transportState]}
+      messages={messages}
+      pendingText={pendingText}
+      isMicOn={isReady && isMicEnabled}
+      isVoiceOn={isVoiceOn}
+      onSend={send}
+      onToggleMic={toggleMic}
+      onToggleVoice={state.toggleVoice}
+    >
+      <BotAudio isMuted={!isVoiceOn} />
+    </Panel>
+  );
+}
+
+export function Conversation() {
+  const session = useSessionClient();
+  const [pendingText, setPendingText] = useState<string | null>(null);
+  const [isVoiceOn, setIsVoiceOn] = useState(false);
+  const { start } = session;
+  const clearPendingText = useCallback(() => setPendingText(null), []);
+
+  const state: ConversationState = {
+    session,
+    pendingText,
+    isVoiceOn,
+    startWithText: (text) => {
+      setPendingText(text);
+      void start(false);
+    },
+    queueText: setPendingText,
+    startWithMic: () => {
+      void start(true).then((isConnected) => {
+        if (isConnected) {
+          setIsVoiceOn(true);
+        }
+      });
+    },
+    clearPendingText,
+    toggleVoice: () => setIsVoiceOn((wasVoiceOn) => !wasVoiceOn),
+  };
+
+  if (session.client === null) {
+    return (
+      <Panel
+        session={session}
+        connectionStatus={
+          pendingText !== null && !session.isSignInRequired && !session.notice
+            ? "connecting"
+            : "idle"
+        }
+        messages={[]}
+        pendingText={pendingText}
+        isMicOn={false}
+        isVoiceOn={isVoiceOn}
+        onSend={state.startWithText}
+        onToggleMic={state.startWithMic}
+        onToggleVoice={state.toggleVoice}
+      />
+    );
+  }
+  return (
+    // Keyed by client so per-session state, like whether the bot has opened, starts fresh.
+    <PipecatClientProvider key={session.clientId} client={session.client}>
+      <LivePanel state={state} />
+    </PipecatClientProvider>
   );
 }

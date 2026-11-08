@@ -11,6 +11,9 @@ importers:
       '@pipecat-ai/client-js':
         specifier: 1.16.0
         version: 1.16.0
+      '@pipecat-ai/client-react':
+        specifier: 1.11.0
+        version: 1.11.0(@pipecat-ai/client-js@1.16.0)(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@pipecat-ai/daily-transport':
         specifier: 1.7.2
         version: 1.7.2(@pipecat-ai/client-js@1.16.0)
@@ -379,6 +382,13 @@ packages:
   '@pipecat-ai/client-js@1.16.0':
     resolution: {integrity: sha512-rQyct+EghojirF/FSmXMMVkw2vdyO27AmZuNcpurDmbO88NBDtLgjr3X1WdpTYwBcyZMcoks4Cf8uIiUir2b8g==}
 
+  '@pipecat-ai/client-react@1.11.0':
+    resolution: {integrity: sha512-A2sWJVBVPnOQEDjfr/gqHhOsvR8QUXJefOKNTzl5kS8hXf7k70ivMMkH76f/Q44q2Z1h9ML1PY/gFx/k07PXvA==}
+    peerDependencies:
+      '@pipecat-ai/client-js': '>=1.14.0'
+      react: '>=18'
+      react-dom: '>=18'
+
   '@pipecat-ai/daily-transport@1.7.2':
     resolution: {integrity: sha512-e6dXRvFR63uDzFp+G1xrtxSoKqG2f6tGaaEJl5YuXDv1uIKb6Skzc9aGLFDXgpCR+DH+7J3ub6zE7b24ZppgJg==}
     peerDependencies:
@@ -591,6 +601,24 @@ packages:
 
   jose@6.2.15:
     resolution: {integrity: sha512-qdF6ewcZARtef63fJ9AKKZPgxw+t7USH6HLXYcD4CrdmSvDp79rpJSPFEKc90QBeGS63u1KQtN2MZQHC0yDIzA==}
+
+  jotai@2.20.3:
+    resolution: {integrity: sha512-N8L9FUbeGDP+0qNJw1FebOxt+5hk+jTOwUA2LlRE4C081jUcY6F1T/FSETp4DT2/INMtiSRZyNm2D+yZdzrSgA==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@babel/core': '>=7.0.0'
+      '@babel/template': '>=7.0.0'
+      '@types/react': '>=17.0.0'
+      react: '>=17.0.0'
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+      '@babel/template':
+        optional: true
+      '@types/react':
+        optional: true
+      react:
+        optional: true
 
   js-yaml@3.15.2:
     resolution: {integrity: sha512-6EuL879VkRA+1Cz578mKMiKvjPNEuk6+r1JaFzoSWejZmtf7xWbIyw1e3KkxlkzTIt9Taw6JBhEppG7utc1P+w==}
@@ -1067,6 +1095,17 @@ snapshots:
       typed-emitter: 2.1.0
       uuid: 11.1.1
 
+  '@pipecat-ai/client-react@1.11.0(@pipecat-ai/client-js@1.16.0)(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@pipecat-ai/client-js': 1.16.0
+      jotai: 2.20.3(@types/react@19.3.0)(react@19.3.1)
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@babel/template'
+      - '@types/react'
+
   '@pipecat-ai/daily-transport@1.7.2(@pipecat-ai/client-js@1.16.0)':
     dependencies:
       '@daily-co/daily-js': 0.94.0
@@ -1251,6 +1290,11 @@ snapshots:
   jiti@2.7.0: {}
 
   jose@6.2.15: {}
+
+  jotai@2.20.3(@types/react@19.3.0)(react@19.3.1):
+    optionalDependencies:
+      '@types/react': 19.3.0
+      react: 19.3.1
 
   js-yaml@3.15.2:
     dependencies:
