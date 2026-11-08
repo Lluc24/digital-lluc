@@ -23,7 +23,11 @@ from digital_lluc.domain import (
     SessionRequest,
     UsageStoreError,
 )
-from digital_lluc.local import InMemoryUsageCounter, LocalBotLauncher
+from digital_lluc.local import (
+    InMemoryUsageCounter,
+    LocalRunnerLauncher,
+    create_local_runner_client,
+)
 from digital_lluc.pipecat_cloud import PipecatCloudLauncher, create_pipecat_cloud_client
 from digital_lluc.upstash import UpstashUsageCounter, create_upstash_client
 
@@ -48,7 +52,7 @@ class CloudApiSettings(_BaseApiSettings):
 
 class LocalApiSettings(_BaseApiSettings):
     deployment: Literal["local"]
-    local_bot_offer_url: HttpUrl = HttpUrl("http://localhost:7080/api/offer")
+    local_runner_url: HttpUrl = HttpUrl("http://localhost:7860")
 
 
 class _DeploymentSettings(BaseSettings):
@@ -63,11 +67,6 @@ def load_settings() -> CloudApiSettings | LocalApiSettings:
             return LocalApiSettings(deployment="local")
 
 
-class SessionRequestBody(BaseModel):
-    session_id: str
-    user_id: str
-
-
 class DailySessionResponse(BaseModel):
     transport: Literal["daily"] = "daily"
     room_url: str
@@ -77,7 +76,6 @@ class DailySessionResponse(BaseModel):
 class LocalWebrtcSessionResponse(BaseModel):
     transport: Literal["smallwebrtc"] = "smallwebrtc"
     offer_url: str
-    request_data: SessionRequestBody
 
 
 class DailyCapExceededResponse(BaseModel):
@@ -96,13 +94,8 @@ def _to_response(
     match connection:
         case DailyRoom(room_url=room_url, token=token):
             return DailySessionResponse(room_url=room_url, token=token)
-        case LocalWebrtcOffer(offer_url=offer_url, request=request):
-            return LocalWebrtcSessionResponse(
-                offer_url=offer_url,
-                request_data=SessionRequestBody(
-                    session_id=request.session_id, user_id=request.user_id
-                ),
-            )
+        case LocalWebrtcOffer(offer_url=offer_url):
+            return LocalWebrtcSessionResponse(offer_url=offer_url)
         case _:
             assert_never(connection)
 
@@ -128,10 +121,11 @@ def _adapters(
                 [upstash_client, pipecat_cloud_client],
             )
         case LocalApiSettings():
+            local_runner_client = create_local_runner_client(settings.local_runner_url)
             return (
                 InMemoryUsageCounter(),
-                LocalBotLauncher(str(settings.local_bot_offer_url)),
-                [],
+                LocalRunnerLauncher(local_runner_client),
+                [local_runner_client],
             )
         case _:
             assert_never(settings)

@@ -20,10 +20,7 @@ class DailyRoom:
 
 @dataclass(frozen=True)
 class LocalWebrtcOffer:
-    """The browser forwards `request` with its offer, as Pipecat Cloud forwards it on start."""
-
     offer_url: str
-    request: SessionRequest
 
 
 type AgentConnection = DailyRoom | LocalWebrtcOffer
