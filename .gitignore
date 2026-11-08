@@ -14,3 +14,7 @@ web.log
 .vscode/
 local/
 recordings/
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
