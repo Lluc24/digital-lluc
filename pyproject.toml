@@ -1,0 +1,34 @@
+[tool.uv.workspace]
+members = ["backend"]
+
+[dependency-groups]
+dev = ["ruff>=0.17.4", "mypy>=2.4.1", "pytest>=9.2.0"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+extend-exclude = ["bot", "web", "docs"]
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RET", "ARG", "PTH",
+  "RUF", "ANN", "BLE", "ERA", "FBT", "TRY", "PL", "S", "TID",
+]
+# E501: the formatter owns line length. TRY003: boundary errors must name expected vs received.
+ignore = ["E501", "TRY003"]
+
+[tool.ruff.lint.per-file-ignores]
+# S101: pytest asserts. PLR2004: literal expected values read better in tests.
+"backend/tests/**" = ["S101", "PLR2004"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"typing.Any".msg = "No Any: name the real type, or parse the value with Pydantic."
+"typing.cast".msg = "No cast: parse the value into its type instead."
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unreachable = true
+disallow_any_unimported = true
+disallow_any_decorated = true
+enable_error_code = ["ignore-without-code"]

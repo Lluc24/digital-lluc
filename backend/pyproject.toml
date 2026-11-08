@@ -1,0 +1,10 @@
+[project]
+name = "digital-lluc"
+version = "0.1.0"
+description = "digital-lluc: the session API and the Pipecat voice bot behind lluc.sh"
+requires-python = ">=3.13"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.11.15,<0.12"]
+build-backend = "uv_build"
