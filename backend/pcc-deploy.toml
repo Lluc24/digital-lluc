@@ -1,6 +1,8 @@
 agent_name = "digital-lluc"
 image = "lluc24/digital-lluc:0.4"
 secret_set = "digital-lluc-secrets"
+# Hard stop with no goodbye; MAX_SESSION_SECONDS (600) says goodbye well before it.
+max_session_duration = 900
 
 [scaling]
 min_agents = 0

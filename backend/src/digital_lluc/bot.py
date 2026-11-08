@@ -12,8 +12,12 @@ from typing import Literal, assert_never
 
 from loguru import logger
 from pipecat.audio.vad.silero import SileroVADAnalyzer
-from pipecat.frames.frames import EndFrame, Frame, LLMRunFrame, MetricsFrame
-from pipecat.metrics.metrics import LLMUsageMetricsData
+from pipecat.frames.frames import EndFrame, Frame, LLMRunFrame, TTSSpeakFrame
+from pipecat.observers.service_metrics_observer import (
+    ServiceMetricsObserver,
+    ServiceUsageKind,
+    ServiceUsageRecord,
+)
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.worker import PipelineParams, PipelineWorker
 from pipecat.processors.aggregators.llm_context import LLMContext
@@ -22,7 +26,6 @@ from pipecat.processors.aggregators.llm_response_universal import (
     LLMUserAggregatorParams,
 )
 from pipecat.processors.audio.audio_buffer_processor import AudioBufferProcessor
-from pipecat.processors.frame_processor import FrameDirection, FrameProcessor
 from pipecat.runner.types import RunnerArguments
 from pipecat.runner.utils import create_transport
 from pipecat.services.cartesia.tts import CartesiaTTSService
@@ -50,8 +53,7 @@ from digital_lluc.recordings import LocalDirectoryRecordingStore, VercelBlobReco
 
 _PROFILE_FILE_NAMES = ("BACKGROUND.yaml", "PERSONAL.yaml")
 _RECORDING_SAMPLE_RATE_HZ = 16000
-# Long enough for the goodbye to be spoken before the session ends.
-_GOODBYE_GRACE_SECONDS = 10
+_GOODBYE = "That's all the time we have. If you want to keep talking, email the real Lluc. Bye!"
 
 
 class _BaseBotSettings(BaseSettings):
@@ -128,22 +130,17 @@ def load_system_prompt(profile_dir: Path) -> str:
     )
 
 
-class TokenUsageCollector(FrameProcessor):
-    """Sums the LLM token usage reported in metrics frames over the session."""
+class TokenUsageTally:
+    """Sums the per-inference LLM usage records ServiceMetricsObserver reports, which it never sums."""
 
     def __init__(self) -> None:
-        super().__init__()
         self.token_usage = NO_TOKEN_USAGE
 
-    async def process_frame(self, frame: Frame, direction: FrameDirection) -> None:
-        await super().process_frame(frame, direction)
-        if isinstance(frame, MetricsFrame):
-            for entry in frame.data:
-                if isinstance(entry, LLMUsageMetricsData):
-                    self.token_usage = self.token_usage.plus(
-                        TokenUsage(entry.value.prompt_tokens, entry.value.completion_tokens)
-                    )
-        await self.push_frame(frame, direction)
+    async def on_service_usage(self, _: ServiceMetricsObserver, record: ServiceUsageRecord) -> None:
+        if record.kind == ServiceUsageKind.LLM:
+            self.token_usage = self.token_usage.plus(
+                TokenUsage(record.prompt_tokens or 0, record.completion_tokens or 0)
+            )
 
 
 class AudioCapture:
@@ -159,28 +156,16 @@ class AudioCapture:
 
 
 def transcript(context: LLMContext) -> tuple[TranscriptTurn, ...]:
+    # Read from the context, not turn events: RTVI send-text appends to the context and fires none.
     messages = _CONTEXT_MESSAGES.validate_python(context.get_messages())
     return tuple(TranscriptTurn(message.role, message.content) for message in messages)
 
 
-async def _say_goodbye_after(
-    max_session_seconds: int, context: LLMContext, worker: PipelineWorker
-) -> None:
+async def _say_goodbye_after(max_session_seconds: int, worker: PipelineWorker) -> None:
+    """Graceful cap from docs.pipecat.ai/pipecat/learn/pipeline-termination: EndFrame drains the goodbye first."""
     await asyncio.sleep(max_session_seconds)
-    logger.info(f"⏰ max session duration ({max_session_seconds}s) reached")
-    context.add_message(
-        {
-            "role": "developer",
-            "content": (
-                "The session time limit was reached. Say a one-sentence goodbye "
-                "and mention they can email the real Lluc."
-            ),
-        }
-    )
-    await worker.queue_frames([LLMRunFrame()])
-    await asyncio.sleep(_GOODBYE_GRACE_SECONDS)
-    logger.info("🛑 ending session after goodbye")
-    await worker.queue_frames([EndFrame()])
+    logger.info(f"⏰ max session duration ({max_session_seconds}s) reached, saying goodbye")
+    await worker.queue_frames([TTSSpeakFrame(_GOODBYE), EndFrame()])
 
 
 async def run_session(
@@ -216,7 +201,9 @@ async def run_session(
     )
     audio_capture = AudioCapture()
     recorder.add_event_handler("on_audio_data", audio_capture.on_audio_data)
-    token_usage_collector = TokenUsageCollector()
+    usage_observer = ServiceMetricsObserver()
+    token_usage_tally = TokenUsageTally()
+    usage_observer.add_event_handler("on_service_usage", token_usage_tally.on_service_usage)
 
     pipeline = Pipeline(
         [
@@ -227,20 +214,24 @@ async def run_session(
             tts,
             transport.output(),
             recorder,
-            token_usage_collector,
             assistant_aggregator,
         ]
     )
     worker = PipelineWorker(
         pipeline,
         params=PipelineParams(enable_metrics=True, enable_usage_metrics=True),
+        observers=[usage_observer],
         enable_rtvi=True,
         idle_timeout_secs=settings.idle_timeout_seconds,
         cancel_on_idle_timeout=True,
     )
 
+    goodbye: asyncio.Task[None] | None = None
+
     async def on_client_connected(_transport: BaseTransport, _client: object) -> None:
+        nonlocal goodbye
         logger.info("🔌 client connected")
+        goodbye = asyncio.create_task(_say_goodbye_after(settings.max_session_seconds, worker))
         context.add_message({"role": "developer", "content": "Start the call by saying hello."})
         await worker.queue_frames([LLMRunFrame()])
 
@@ -248,29 +239,31 @@ async def run_session(
         logger.info("👋 client disconnected")
         await worker.cancel()
 
+    async def on_pipeline_finished(_worker: PipelineWorker, _frame: Frame) -> None:
+        # Fires for both EndFrame and CancelFrame, so the session is saved exactly once.
+        logger.info("🏁 pipeline finished")
+        if goodbye is not None:
+            goodbye.cancel()
+        await recording_store(settings).save(
+            SessionRecording(
+                request=request,
+                started_at=started_at,
+                ended_at=datetime.now(UTC),
+                token_usage=token_usage_tally.token_usage,
+                transcript=transcript(context),
+                audio=audio_capture.audio,
+            )
+        )
+        logger.info(f"🗂️ recorded session {request.session_id}")
+
     transport.add_event_handler("on_client_connected", on_client_connected)
     transport.add_event_handler("on_client_disconnected", on_client_disconnected)
+    worker.add_event_handler("on_pipeline_finished", on_pipeline_finished)
 
-    goodbye = asyncio.create_task(_say_goodbye_after(settings.max_session_seconds, context, worker))
     runner = WorkerRunner(handle_sigint=handle_sigint)
     logger.info("🚀 starting pipeline worker")
-    try:
-        await runner.add_workers(worker)
-        await runner.run()
-    finally:
-        goodbye.cancel()
-        logger.info("🏁 pipeline worker stopped")
-    await recording_store(settings).save(
-        SessionRecording(
-            request=request,
-            started_at=started_at,
-            ended_at=datetime.now(UTC),
-            token_usage=token_usage_collector.token_usage,
-            transcript=transcript(context),
-            audio=audio_capture.audio,
-        )
-    )
-    logger.info(f"🗂️ recorded session {request.session_id}")
+    await runner.add_workers(worker)
+    await runner.run()
 
 
 _TRANSPORT_PARAMS: dict[str, Callable[[], TransportParams]] = {
