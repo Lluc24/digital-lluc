@@ -1,7 +1,7 @@
-.PHONY: setup check fix dev-api
+.PHONY: setup check fix dev-api dev-bot
 
 setup:
-	uv sync --all-packages
+	uv sync --all-packages --all-extras
 	git config core.hooksPath .githooks
 
 check:
@@ -16,3 +16,6 @@ fix:
 
 dev-api:
 	uv run --env-file backend/.env uvicorn digital_lluc.api:app --reload --port 8000
+
+dev-bot:
+	uv run --env-file backend/.env python -m digital_lluc.bot -t webrtc

@@ -13,6 +13,13 @@ dependencies = [
     "uvicorn>=0.54.0",
 ]
 
+[project.optional-dependencies]
+bot = [
+    "pipecat-ai[cartesia,daily,deepgram,openai,runner,silero,webrtc]~=1.15.0",
+    "pyyaml>=6.0.3",
+    "vercel>=0.12.2",
+]
+
 [build-system]
 requires = ["uv_build>=0.11.15,<0.12"]
 build-backend = "uv_build"

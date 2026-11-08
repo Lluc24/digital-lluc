@@ -7,6 +7,7 @@ from digital_lluc.domain import (
     AgentConnection,
     AgentUnavailableError,
     DailyCapExceededError,
+    SessionRecording,
     SessionRequest,
     UserId,
     is_within_daily_cap,
@@ -52,3 +53,7 @@ async def start_session(
         logger.info(f"🚀 launched session {request.session_id} for {request.user_id}")
         return connection
     raise DailyCapExceededError(sessions_started_today, sessions_per_day)
+
+
+class RecordingStore(Protocol):
+    async def save(self, recording: SessionRecording) -> None: ...
