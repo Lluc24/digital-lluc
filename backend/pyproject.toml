@@ -3,7 +3,15 @@ name = "digital-lluc"
 version = "0.1.0"
 description = "digital-lluc: the session API and the Pipecat voice bot behind lluc.sh"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi>=0.162.2",
+    "httpx>=0.28.1",
+    "loguru>=0.7.3",
+    "pydantic>=2.12",
+    "pydantic-settings>=2.16.2",
+    "pyjwt>=2.15.1",
+    "uvicorn>=0.54.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.11.15,<0.12"]
