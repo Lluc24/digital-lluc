@@ -26,18 +26,6 @@ def _use_transport(
     monkeypatch.setattr(httpx, "AsyncClient", client_with_mock_transport)
 
 
-def test_sends_nothing_without_a_webhook_url(monkeypatch: pytest.MonkeyPatch) -> None:
-    requests: list[httpx.Request] = []
-
-    def record(request: httpx.Request) -> httpx.Response:
-        requests.append(request)
-        return httpx.Response(200)
-
-    _use_transport(monkeypatch, record)
-    asyncio.run(notify_session_started(None, _USER_ID))
-    assert requests == []
-
-
 def test_posts_the_user_id_to_the_webhook(monkeypatch: pytest.MonkeyPatch) -> None:
     requests: list[httpx.Request] = []
 

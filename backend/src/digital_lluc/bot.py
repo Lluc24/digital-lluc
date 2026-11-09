@@ -194,8 +194,11 @@ async def run_session(
 ) -> None:
     started_at = datetime.now(UTC)
     logger.info(f"🎬 session {request.session_id} for {request.user_id}")
-    session_started_notification = asyncio.create_task(
-        notify_session_started(settings.slack_activity_webhook_url, request.user_id)
+    webhook_url = settings.slack_activity_webhook_url
+    session_started_notifications = (
+        ()
+        if webhook_url is None
+        else (asyncio.create_task(notify_session_started(webhook_url, request.user_id)),)
     )
 
     stt = DeepgramSTTService(api_key=settings.deepgram_api_key.get_secret_value())
@@ -285,7 +288,7 @@ async def run_session(
     await runner.add_workers(worker)
     await runner.run()
     # Awaited so a post still in flight is not destroyed when the session returns.
-    await session_started_notification
+    await asyncio.gather(*session_started_notifications)
 
 
 _TRANSPORT_PARAMS: dict[str, Callable[[], TransportParams]] = {

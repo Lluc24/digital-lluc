@@ -6,6 +6,7 @@ Follow these exactly. When they conflict with a habit, the rules win; when they 
 
 - Validate where untrusted data enters: HTTP handlers, CLI args, file parsers, external APIs, database reads, environment variables. Reject bad input with a message naming what was expected and what was received.
 - Validation turns raw input into typed domain values. Past the boundary the data is valid **by construction**: no `if x is None`, no `hasattr`, no `isinstance` against your own types, no try/except around internal calls.
+- Decide an optional setting once, where it is wired (the composition root). The code it enables takes the non-optional value, with no `if x is None` guard or early return re-checking it.
 - Never branch on a state that cannot occur. If you cannot tell whether a value can be absent, the contract is broken: fix the signature or the construction site, never the call site.
 - Let exceptions propagate to the layer that can act on them. Never catch to return `None` or a default, never swallow, never log-and-continue past a broken invariant.
 - `assert` is acceptable for invariants that must hold by construction.
