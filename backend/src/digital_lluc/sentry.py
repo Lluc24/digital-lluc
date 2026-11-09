@@ -1,9 +1,10 @@
 import asyncio
 import re
-from typing import TYPE_CHECKING, cast  # noqa: TID251 sentry_sdk: before_send must return its Event TypedDict
+from typing import TYPE_CHECKING, cast
 
 import sentry_sdk
 from pydantic import SecretStr
+from sentry_sdk.integrations.httpx import HttpxIntegration
 from sentry_sdk.utils import event_from_exception
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
@@ -56,6 +57,8 @@ def init_sentry(dsn: SecretStr) -> None:
         profiles_sample_rate=0.0,
         before_send=_scrub_event,
         before_breadcrumb=_scrub_breadcrumb,
+        # Its breadcrumbs carry request URLs, and the Slack webhook URL is itself the credential.
+        disabled_integrations=[HttpxIntegration()],
     )
 
 

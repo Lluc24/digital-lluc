@@ -25,6 +25,9 @@ ignore = ["E501", "TRY003"]
 [tool.ruff.lint.per-file-ignores]
 # S101: pytest asserts. PLR2004: literal expected values read better in tests.
 "backend/tests/**" = ["S101", "PLR2004"]
+# TID251 (also waives the Any ban here): sentry_sdk's before_send must return its Event
+# TypedDict, which only cast can give.
+"backend/src/digital_lluc/sentry.py" = ["TID251"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "typing.Any".msg = "No Any: name the real type, or parse the value with Pydantic."
