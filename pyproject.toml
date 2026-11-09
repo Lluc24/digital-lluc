@@ -5,7 +5,6 @@ members = ["backend"]
 dev = [
     "ruff>=0.17.4",
     "mypy>=2.4.1",
-    "pytest>=9.2.0",
     "types-pyyaml>=6.0",
 ]
 
@@ -21,10 +20,6 @@ select = [
 ]
 # E501: the formatter owns line length. TRY003: boundary errors must name expected vs received.
 ignore = ["E501", "TRY003"]
-
-[tool.ruff.lint.per-file-ignores]
-# S101: pytest asserts. PLR2004: literal expected values read better in tests.
-"backend/tests/**" = ["S101", "PLR2004"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "typing.Any".msg = "No Any: name the real type, or parse the value with Pydantic."

@@ -58,6 +58,10 @@ Default count is **zero**. Allowed only for what code cannot carry: a non-obviou
 - Problems in files you are not touching: report them in the PR description.
 - One way to do each thing. Match surrounding patterns; if a pattern violates these rules, refactor it. The formatter and linter own layout.
 
+## 10. No automated tests
+
+- This repo has no automated tests, by the owner's decision. Do not add tests, test scaffolding, test dependencies, or test CI. Correctness rests on types, validation at the boundary, ruff and mypy.
+
 ## Example
 
 ```python
