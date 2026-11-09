@@ -3,7 +3,7 @@ import asyncio
 import httpx
 import sentry_sdk
 from loguru import logger
-from pydantic import SecretStr
+from pydantic import HttpUrl, Secret
 
 from digital_lluc.domain import UserId
 
@@ -15,22 +15,24 @@ def _escape_slack_text(text: str) -> str:
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-async def notify_session_started(webhook_url: SecretStr | None, user_id: UserId) -> None:
+async def notify_session_started(webhook_url: Secret[HttpUrl] | None, user_id: UserId) -> None:
     """Post: Slack received a message naming user_id, or nothing was sent when webhook_url is
-    None. Never raises: a missed notification must not end a session. Failures are reported
+    None. Raises nothing, so a missed notification never ends a session. Failures are reported
     without user_id, which goes only to Slack."""
     if webhook_url is None:
         return
     try:
+        # trust_env=False: proxy and CA env vars would make the constructor raise outside
+        # HTTPError; with a validated URL, post raises only HTTPError and the timeout TimeoutError.
         async with (
             asyncio.timeout(_WEBHOOK_TIMEOUT_SECONDS),
-            httpx.AsyncClient() as client,
+            httpx.AsyncClient(trust_env=False) as client,
         ):
             response = await client.post(
-                webhook_url.get_secret_value(),
+                str(webhook_url.get_secret_value()),
                 json={"text": f"Digital Lluc conversation started: {_escape_slack_text(user_id)}"},
             )
-    except Exception as error:  # noqa: BLE001 httpx/Slack: reported, never raised, so the session goes on
+    except (httpx.HTTPError, TimeoutError) as error:
         logger.warning(f"📣 Slack activity notification failed: {type(error).__name__}")
         sentry_sdk.capture_exception(error)
         return

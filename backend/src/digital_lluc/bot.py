@@ -39,7 +39,9 @@ from pydantic import (
     ConfigDict,
     DirectoryPath,
     Field,
+    HttpUrl,
     PositiveInt,
+    Secret,
     SecretStr,
     TypeAdapter,
 )
@@ -79,7 +81,7 @@ class _BaseBotSettings(BaseSettings):
     idle_timeout_seconds: PositiveInt = 120
     profile_dir: DirectoryPath = Path("profile")
     sentry_dsn: SecretStr | None = None
-    slack_activity_webhook_url: SecretStr | None = None
+    slack_activity_webhook_url: Secret[HttpUrl] | None = None
 
 
 class CloudBotSettings(_BaseBotSettings):

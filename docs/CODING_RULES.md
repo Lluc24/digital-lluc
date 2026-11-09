@@ -38,7 +38,9 @@ Follow these exactly. When they conflict with a habit, the rules win; when they 
 
 ## 6. No escape hatches
 
-- No `# type: ignore`, `cast()`, `Any`, or `# noqa` outside adapters. Each hides a broken contract. Fix the type or the code. Inside an adapter, name the library and reason on the same line.
+- No `# type: ignore`, `cast()`, or `Any` outside adapters. Each hides a broken contract. Fix the type or the code. Inside an adapter, name the library and reason on the same line.
+- No inline `# noqa`. A deliberate lint exception is a `per-file-ignores` entry in `pyproject.toml`, scoped to the one file, with a comment naming the library and the reason.
+- No `except Exception`. Catch the specific exceptions the library documents (e.g. `httpx.HTTPError`), and validate inputs at the boundary so nothing else can be raised. A catch-all is allowed only to re-raise. Catching to log and continue is allowed only for a side effect whose failure must not stop the caller, such as a notification.
 - A badly typed third-party library gets one typed wrapper at the boundary, not an ignore at every call site.
 
 ## 7. Functions and names

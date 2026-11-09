@@ -1,6 +1,6 @@
 import asyncio
 import re
-from typing import TYPE_CHECKING, cast  # noqa: TID251 sentry_sdk: before_send must return its Event TypedDict
+from typing import TYPE_CHECKING, cast
 
 import sentry_sdk
 from pydantic import SecretStr
