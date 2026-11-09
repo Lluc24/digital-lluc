@@ -6,7 +6,7 @@ export default function Privacy() {
   return (
     <main className="max-w-2xl mx-auto px-4 py-10 space-y-6 text-sm">
       <h1 className="text-lg font-bold">/privacy</h1>
-      <p className="text-dim">Last updated: 25 October 2026</p>
+      <p className="text-dim">Last updated: 8 November 2026</p>
 
       <p>
         This site (lluc.sh, digital-lluc) is a personal project run by Lluc
