@@ -1,6 +1,7 @@
 """Pipecat composition root: Deepgram (STT) -> OpenAI (LLM) -> Cartesia (TTS).
 
 Local:  uv run python -m digital_lluc.bot -t webrtc   (see `make dev-bot`)
+Evals:  the dev runner's /ws route, which `pipecat eval` connects to (see backend/evals/)
 Cloud:  Pipecat Cloud's base image calls `bot()` from /app/bot.py.
 """
 
@@ -13,6 +14,7 @@ from uuid import uuid4
 
 from loguru import logger
 from pipecat.audio.vad.silero import SileroVADAnalyzer
+from pipecat.evals.transport import EvalTransportParams
 from pipecat.frames.frames import EndFrame, Frame, LLMRunFrame, TTSSpeakFrame
 from pipecat.observers.service_metrics_observer import (
     ServiceMetricsObserver,
@@ -304,6 +306,7 @@ async def run_session(
 _TRANSPORT_PARAMS: dict[str, Callable[[], TransportParams]] = {
     "daily": lambda: DailyParams(audio_in_enabled=True, audio_out_enabled=True),
     "webrtc": lambda: TransportParams(audio_in_enabled=True, audio_out_enabled=True),
+    "eval": lambda: EvalTransportParams(audio_in_enabled=True, audio_out_enabled=True),
 }
 
 
