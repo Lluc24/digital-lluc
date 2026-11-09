@@ -1,0 +1,57 @@
+name: Voicebot evals
+
+on:
+  pull_request:
+    paths:
+      - backend/**
+      - pyproject.toml
+      - uv.lock
+      - .github/workflows/voicebot-evals.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voicebot-evals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Free: no secrets, no network calls beyond installing dependencies.
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --all-extras --locked
+      - run: uv run pytest backend/tests -q
+
+  # Manual only: every run spends OpenAI tokens. The bot still opens its Deepgram and Cartesia
+  # connections in text mode, so it needs all three key secrets.
+  scripted-evals:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DEPLOYMENT: local
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+      CARTESIA_API_KEY: ${{ secrets.CARTESIA_API_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --all-extras --locked
+      - run: uv tool install "pipecat-ai[cli]==1.15.0"
+      - run: curl -fsSL https://ollama.com/install.sh | sh
+      - run: ollama pull gemma4:12b
+      - run: pipecat eval suite backend/evals/manifest.yaml
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: eval-runs
+          path: eval-runs/
+          if-no-files-found: ignore

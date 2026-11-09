@@ -1,0 +1,13 @@
+name: about_lluc
+scenarios:
+  - name: answers_from_the_background
+    turns:
+      - expect:
+          - event: response
+            within_ms: 30000
+      - user: "Where do you work right now?"
+        expect:
+          - event: response
+            within_ms: 30000
+            text_contains: "Prosper"
+            eval: "says it works at Prosper AI, in the first person, in a few spoken sentences"

@@ -1,6 +1,7 @@
 """Pipecat composition root: Deepgram (STT) -> OpenAI (LLM) -> Cartesia (TTS).
 
 Local:  uv run python -m digital_lluc.bot -t webrtc   (see `make dev-bot`)
+Evals:  the dev runner's /ws route, which `pipecat eval` connects to (see backend/evals/)
 Cloud:  Pipecat Cloud's base image calls `bot()` from /app/bot.py.
 """
 
@@ -9,9 +10,11 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal, assert_never
+from uuid import uuid4
 
 from loguru import logger
 from pipecat.audio.vad.silero import SileroVADAnalyzer
+from pipecat.evals.transport import EvalTransportParams
 from pipecat.frames.frames import EndFrame, Frame, LLMRunFrame, TTSSpeakFrame
 from pipecat.observers.service_metrics_observer import (
     ServiceMetricsObserver,
@@ -110,6 +113,21 @@ class _SessionRequestBody(BaseModel):
     user_id: str = Field(min_length=1)
 
 
+class _LegacySessionRequestBody(BaseModel):
+    """The legacy bot/bot.py contract the live web/ site still sends."""
+
+    # Forbidding extras keeps a partial new-shape body from being read as a legacy one.
+    model_config = ConfigDict(hide_input_in_errors=True, extra="forbid")
+
+    user: str = Field(min_length=1)
+
+
+_SESSION_REQUEST_BODY = TypeAdapter(
+    _SessionRequestBody | _LegacySessionRequestBody,
+    config=ConfigDict(hide_input_in_errors=True),
+)
+
+
 class _ContextMessage(BaseModel):
     role: str
     content: str
@@ -118,10 +136,16 @@ class _ContextMessage(BaseModel):
 _CONTEXT_MESSAGES = TypeAdapter(list[_ContextMessage])
 
 
-def parse_session_request(runner_body: object) -> SessionRequest:
-    """Parses the body the session API sent through Pipecat Cloud or the local runner's /start."""
-    body = _SessionRequestBody.model_validate(runner_body)
-    return SessionRequest(session_id=SessionId(body.session_id), user_id=UserId(body.user_id))
+def parse_session_request(runner_body: object, legacy_session_id: SessionId) -> SessionRequest:
+    """Parses the body the session API sent through Pipecat Cloud or the local runner's /start.
+
+    Post: a legacy {"user": ...} body, which carries no session id, gets `legacy_session_id`.
+    """
+    match _SESSION_REQUEST_BODY.validate_python(runner_body):
+        case _SessionRequestBody(session_id=session_id, user_id=user_id):
+            return SessionRequest(session_id=SessionId(session_id), user_id=UserId(user_id))
+        case _LegacySessionRequestBody(user=user):
+            return SessionRequest(session_id=legacy_session_id, user_id=UserId(user))
 
 
 def recording_store(settings: CloudBotSettings | LocalBotSettings) -> RecordingStore:
@@ -282,6 +306,7 @@ async def run_session(
 _TRANSPORT_PARAMS: dict[str, Callable[[], TransportParams]] = {
     "daily": lambda: DailyParams(audio_in_enabled=True, audio_out_enabled=True),
     "webrtc": lambda: TransportParams(audio_in_enabled=True, audio_out_enabled=True),
+    "eval": lambda: EvalTransportParams(audio_in_enabled=True, audio_out_enabled=True),
 }
 
 
@@ -290,7 +315,7 @@ async def bot(runner_args: RunnerArguments) -> None:
     settings = load_settings()
     if settings.sentry_dsn is not None:
         init_sentry(settings.sentry_dsn)
-    request = parse_session_request(runner_args.body)
+    request = parse_session_request(runner_args.body, SessionId(uuid4().hex))
     transport = await create_transport(runner_args, _TRANSPORT_PARAMS)
     await run_session(transport, request, settings, handle_sigint=runner_args.handle_sigint)
 
