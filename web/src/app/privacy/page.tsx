@@ -6,7 +6,7 @@ export default function Privacy() {
   return (
     <main className="max-w-2xl mx-auto px-4 py-10 space-y-6 text-sm">
       <h1 className="text-lg font-bold">/privacy</h1>
-      <p className="text-dim">Last updated: 25 October 2026</p>
+      <p className="text-dim">Last updated: 8 November 2026</p>
 
       <p>
         This site (lluc.sh, digital-lluc) is a personal project run by Lluc
@@ -30,7 +30,9 @@ export default function Privacy() {
         When you start a voice session, the audio recording and transcript are
         stored privately (Vercel Blob), with session metadata in Upstash Redis,
         linked to your email. Only I can access them. I use them to debug and
-        improve digital-lluc, and I delete them on request.
+        improve digital-lluc, and I delete them on request. When you start a
+        voice session while signed in, your sign-in email is sent to my private
+        Slack workspace as an activity notification.
       </p>
       <p>
         To run the conversation, your audio and text are processed by Pipecat
