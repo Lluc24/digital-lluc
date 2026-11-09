@@ -3,7 +3,7 @@ Read the AGENTS.md of every directory you touch. Rules: docs/CODING_RULES.md; th
 - `backend/` (FastAPI session API + Pipecat bot), `frontend/` (Next.js), `profile/` (persona data). `bot/` and `web/` are the legacy apps, deleted at cutover: do not extend them.
 - Validate once at the boundary into typed domain values; fail loud; no `Any`, `cast`, `as`, or ignores outside adapters.
 - Start simple: add a layer, module or abstraction only when concrete code needs it. Dependencies point inward only.
-- Tests only for pure domain logic. `make check` passes before every commit.
+- No automated tests, by the owner's decision: do not add tests, test scaffolding, test dependencies, or test CI. `make check` passes before every commit.
 - Never push to main: branch and PR per CONTRIBUTING.md. Never commit secrets.
 
 ## Commits
