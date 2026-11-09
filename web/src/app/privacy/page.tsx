@@ -30,7 +30,9 @@ export default function Privacy() {
         When you start a voice session, the audio recording and transcript are
         stored privately (Vercel Blob), with session metadata in Upstash Redis,
         linked to your email. Only I can access them. I use them to debug and
-        improve digital-lluc, and I delete them on request.
+        improve digital-lluc, and I delete them on request. When you start a
+        voice session while signed in, your sign-in email is sent to my private
+        Slack workspace as an activity notification.
       </p>
       <p>
         To run the conversation, your audio and text are processed by Pipecat
