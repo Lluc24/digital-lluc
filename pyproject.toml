@@ -21,6 +21,11 @@ select = [
 # E501: the formatter owns line length. TRY003: boundary errors must name expected vs received.
 ignore = ["E501", "TRY003"]
 
+[tool.ruff.lint.per-file-ignores]
+# TID251 (also waives the Any ban here): sentry_sdk's before_send must return its Event
+# TypedDict, which only cast can give.
+"backend/src/digital_lluc/sentry.py" = ["TID251"]
+
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "typing.Any".msg = "No Any: name the real type, or parse the value with Pydantic."
 "typing.cast".msg = "No cast: parse the value into its type instead."

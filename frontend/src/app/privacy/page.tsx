@@ -13,7 +13,7 @@ export default function Privacy() {
           Privacy
         </h1>
         <p className="text-night/50 text-sm dark:text-white/50">
-          Last updated: 8 November 2026
+          Last updated: 9 November 2026
         </p>
         <p>
           This site (lluc.sh, digital-lluc) is a personal project run by Lluc
@@ -39,6 +39,10 @@ export default function Privacy() {
           Cloud and Daily (real-time transport), Deepgram (speech-to-text),
           OpenAI (language model) and Cartesia (text-to-speech), under their own
           privacy policies.
+        </p>
+        <p>
+          When you start a voice conversation, your sign-in email is sent to my
+          Slack so I get an activity notification.
         </p>
         <p>
           Backend errors are reported to Sentry (error monitoring). These

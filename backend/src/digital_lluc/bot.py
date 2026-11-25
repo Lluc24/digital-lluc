@@ -40,7 +40,9 @@ from pydantic import (
     ConfigDict,
     DirectoryPath,
     Field,
+    HttpUrl,
     PositiveInt,
+    Secret,
     SecretStr,
     TypeAdapter,
 )
@@ -60,6 +62,7 @@ from digital_lluc.domain import (
 from digital_lluc.persona import ProfileDocument, compose_system_prompt
 from digital_lluc.recordings import LocalDirectoryRecordingStore, VercelBlobRecordingStore
 from digital_lluc.sentry import init_sentry
+from digital_lluc.slack_activity import notify_session_started
 
 _PROFILE_FILE_NAMES = ("BACKGROUND.yaml", "PERSONAL.yaml")
 _RECORDING_SAMPLE_RATE_HZ = 16000
@@ -79,6 +82,7 @@ class _BaseBotSettings(BaseSettings):
     idle_timeout_seconds: PositiveInt = 120
     profile_dir: DirectoryPath = Path("profile")
     sentry_dsn: SecretStr | None = None
+    slack_activity_webhook_url: Secret[HttpUrl] | None = None
 
 
 class CloudBotSettings(_BaseBotSettings):
@@ -212,6 +216,12 @@ async def run_session(
 ) -> None:
     started_at = datetime.now(UTC)
     logger.info(f"🎬 session {request.session_id} for {request.user_id}")
+    webhook_url = settings.slack_activity_webhook_url
+    session_started_notifications = (
+        ()
+        if webhook_url is None
+        else (asyncio.create_task(notify_session_started(webhook_url, request.user_id)),)
+    )
 
     stt = DeepgramSTTService(api_key=settings.deepgram_api_key.get_secret_value())
     llm = OpenAILLMService(
@@ -299,6 +309,8 @@ async def run_session(
     logger.info("🚀 starting pipeline worker")
     await runner.add_workers(worker)
     await runner.run()
+    # Awaited so a post still in flight is not destroyed when the session returns.
+    await asyncio.gather(*session_started_notifications)
 
 
 _TRANSPORT_PARAMS: dict[str, Callable[[], TransportParams]] = {
