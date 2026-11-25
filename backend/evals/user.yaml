@@ -1,4 +1,4 @@
 modality: audio
 speech:
   factory: eval_services.visitor_voice
-  voice: 71a7ad14-091c-4e8e-a314-022ece01c121
+  voice: db6b0ed5-d5d3-463d-ae85-518a07d3c2b4
