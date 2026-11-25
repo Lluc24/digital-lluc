@@ -1,0 +1,6 @@
+modality: audio
+eval:
+  factory: eval_services.judge
+  model: gpt-4o-mini
+transcription:
+  factory: eval_services.bot_transcriber

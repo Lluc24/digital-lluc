@@ -1,0 +1,10 @@
+name: greeting
+user: !include ../user.yaml
+judge: !include ../judge.yaml
+scenarios:
+  - name: greets_on_connect
+    turns:
+      - expect:
+          - event: response
+            within_ms: 30000
+            eval: "greets the visitor and introduces itself as Lluc or an AI version of Lluc"

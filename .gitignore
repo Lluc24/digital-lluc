@@ -7,8 +7,6 @@
 .pytest_cache/
 __pycache__/
 *.pyc
-bot.log
-web.log
 .mcp.json
 .claude/
 .vscode/
@@ -18,3 +16,4 @@ node_modules/
 .next/
 *.tsbuildinfo
 next-env.d.ts
+eval-runs/

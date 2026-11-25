@@ -37,7 +37,7 @@ jobs:
       - run: uv sync --all-packages --all-extras --locked
       - run: uv run ruff format --check
       - run: uv run ruff check
-      - run: uv run mypy backend/src
+      - run: uv run mypy backend/src backend/evals
       - run: uv run pytest backend/tests -q
 
   frontend:
@@ -58,3 +58,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm build
+

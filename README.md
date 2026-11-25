@@ -1,78 +1,53 @@
-# my-site — talk to digital-lluc
+# lluc.sh: talk to digital-lluc
 
 ![Next.js](https://img.shields.io/badge/Next.js_16-black?logo=nextdotjs)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![Python](https://img.shields.io/badge/Python_3.13-3776AB?logo=python&logoColor=white)
-![Pipecat](https://img.shields.io/badge/Pipecat-1.10.0-7ee787)
+![Pipecat](https://img.shields.io/badge/Pipecat-1.15-7ee787)
 ![uv](https://img.shields.io/badge/uv-managed-DE5FE9?logo=uv&logoColor=white)
-![Status](https://img.shields.io/badge/status-pre--launch-e3b341)
 
-My personal website. The main product is not a portfolio — it's a
-conversation: **digital-lluc**, a first-person AI version of me you can
-talk to by voice or text, built on the same Pipecat stack I work on
-professionally.
+My personal website. The main product is a conversation: **digital-lluc**, a
+first-person AI version of me you can talk to by voice or text.
 
 ```mermaid
 flowchart LR
-    V([Visitor]) -->|https| W[web/ · Next.js on Vercel]
-    W -->|OAuth| A[(Google / GitHub)]
-    W -->|"POST /api/agent/start<br/>(session + daily cap)"| U[(Upstash Redis)]
-    W -->|start| PC[Pipecat Cloud]
-    PC --> B[bot/ · digital-lluc]
-    V <-->|"WebRTC (Daily)<br/>voice + text"| B
-    B -->|audio| D[Deepgram · STT]
-    D --> C[GPT · OpenAI]
-    C --> K[Cartesia · TTS]
-    K -->|audio| B
-    B -.reads.-> P[profile/ · BACKGROUND.yaml + PERSONAL.yaml]
+    V([Visitor]) -->|https| F[frontend/ · Next.js on Vercel]
+    F -->|OAuth| A[(Google / GitHub)]
+    F -->|"POST /v1/sessions"| S[backend/ api.py · session API]
+    S -->|daily cap| U[(Upstash Redis)]
+    S -->|start| PC[Pipecat Cloud]
+    PC --> B[backend/ bot.py · digital-lluc]
+    V <-->|"WebRTC (Daily)"| B
+    B --> D[Deepgram · STT] --> C[OpenAI · LLM] --> K[Cartesia · TTS]
+    B -.reads.-> P[profile/]
 ```
-
-## One feature, four modes
-
-The console on the landing page is a single Pipecat session; the audio
-toggles select the modality — transcript always visible, typing always
-available:
-
-| mic | voice out | you get                          |
-| --- | --------- | -------------------------------- |
-| off | off       | text chat                        |
-| off | on        | type, read + hear the replies    |
-| on  | on        | full voice conversation          |
 
 ## Layout
 
-- `web/` — Next.js 16 app (Vercel): terminal-style console UI, Auth.js
-  (Google + GitHub), `/api/agent/start` with a per-user daily session cap
-  (Upstash Redis), blog scaffolding under `content/blog/`.
-- `bot/` — Pipecat bot (Pipecat Cloud): Deepgram (STT) → OpenAI (LLM) →
-  Cartesia (TTS) pipeline, persona compiled from `profile/`, hard
-  session/idle timeouts.
-- `profile/` — the canonical background YAML the persona is built from
-  (`BACKGROUND.yaml` synced from the my-profile repo, with the CV-only
-  contact details stripped, plus `PERSONAL.yaml` for everything off the
-  clock).
+- `frontend/`: Next.js app, Auth.js sign-in, the conversation console, the blog.
+- `backend/`: one Python package with two roots: `api.py` (session API with a
+  per-visitor daily cap) and `bot.py` (the Pipecat bot). `backend/evals/` holds
+  the end-to-end evals.
+- `profile/`: the YAML the persona is built from.
 
 ## Local development
 
 ```bash
-# bot (terminal 1) — uv-managed (Python >= 3.13, pipecat 1.10.0)
-cd bot && uv sync
-cp .env.example .env   # fill DEEPGRAM_API_KEY, OPENAI_API_KEY, CARTESIA_API_KEY
-uv run bot.py --transport webrtc --port 7080
-
-# web (terminal 2)
-cd web && npm install
-cp .env.example .env.local   # leave PIPECAT_CLOUD_* empty → uses local bot
-npm run dev
+make setup
+cp backend/.env.example backend/.env          # DEEPGRAM_, OPENAI_, CARTESIA_API_KEY; AUTH_TOKEN_SECRET=$(openssl rand -hex 32)
+cp frontend/.env.example frontend/.env.local  # same AUTH_TOKEN_SECRET; LOCAL_DEV_USER_EMAIL skips sign-in
+make dev-bot   # terminal 1
+make dev-api   # terminal 2
+make dev-web   # terminal 3
 ```
 
-Set `DEV_ALLOW_ANONYMOUS=1` in `web/.env.local` to skip login while
-developing.
+`make check` lints, type-checks, tests and builds everything. `make eval` talks
+to the real bot by voice and grades its answers with OpenAI; it spends a few
+cents of OpenAI, Deepgram and Cartesia credit per run.
 
-## Deploy
+## CI and deploy
 
-- **Bot**: `docker build -f bot/Dockerfile -t <registry>/digital-lluc:0.1 .`,
-  push, then `pcc deploy` from `bot/` (secrets live in the
-  `digital-lluc-secrets` set on Pipecat Cloud).
-- **Web**: import `web/` as a Vercel project; set the env vars from
-  `web/.env.example` (plus `PIPECAT_CLOUD_*` and Upstash).
+Every PR runs `make check` and `make eval`. The eval uses the repository secrets
+`OPENAI_API_KEY`, `DEEPGRAM_API_KEY` and `CARTESIA_API_KEY`, so an expired key
+or an empty balance fails the PR. Merging to main deploys the bot to Pipecat
+Cloud; Vercel deploys `frontend/`.

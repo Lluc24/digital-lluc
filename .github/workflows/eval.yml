@@ -1,0 +1,39 @@
+name: Eval
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEPLOYMENT: local
+      CARTESIA_VOICE_ID: 47c38ca4-5f35-497b-b1a3-415245fb35e1
+      PYTHONPATH: backend/evals
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+      CARTESIA_API_KEY: ${{ secrets.CARTESIA_API_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --all-extras --group eval --locked
+      - run: uv run pipecat eval suite backend/evals/manifest.yaml
+      - if: failure() || cancelled()
+        run: |
+          shopt -s dotglob nullglob
+          for log in eval-runs/*/results.jsonl eval-runs/*/logs/*.log; do
+            echo "::group::$log"
+            cat "$log"
+            echo "::endgroup::"
+          done
