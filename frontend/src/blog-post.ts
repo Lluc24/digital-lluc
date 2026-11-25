@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const postFrontMatterSchema = z.object({
   title: z.string().min(1),
-  // YAML parses an unquoted date into a Date; quoted, it stays a string.
   date: z.union([
     z.iso.date(),
     z.date().transform((date) => date.toISOString().slice(0, 10)),

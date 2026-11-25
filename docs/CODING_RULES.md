@@ -6,6 +6,7 @@ Follow these exactly. When they conflict with a habit, the rules win; when they 
 
 - Validate where untrusted data enters: HTTP handlers, CLI args, file parsers, external APIs, database reads, environment variables. Reject bad input with a message naming what was expected and what was received.
 - Validation turns raw input into typed domain values. Past the boundary the data is valid **by construction**: no `if x is None`, no `hasattr`, no `isinstance` against your own types, no try/except around internal calls.
+- Decide an optional setting once, where it is wired (the composition root). The code it enables takes the non-optional value, with no `if x is None` guard or early return re-checking it.
 - Never branch on a state that cannot occur. If you cannot tell whether a value can be absent, the contract is broken: fix the signature or the construction site, never the call site.
 - Let exceptions propagate to the layer that can act on them. Never catch to return `None` or a default, never swallow, never log-and-continue past a broken invariant.
 - `assert` is acceptable for invariants that must hold by construction.
@@ -38,7 +39,9 @@ Follow these exactly. When they conflict with a habit, the rules win; when they 
 
 ## 6. No escape hatches
 
-- No `# type: ignore`, `cast()`, `Any`, or `# noqa` outside adapters. Each hides a broken contract. Fix the type or the code. Inside an adapter, name the library and reason on the same line.
+- No `# type: ignore`, `cast()`, or `Any` outside adapters. Each hides a broken contract. Fix the type or the code.
+- No inline `# noqa`. A deliberate lint exception is a `per-file-ignores` entry in `pyproject.toml`, scoped to the one file.
+- No `except Exception`. Catch the specific exceptions the library documents (e.g. `httpx.HTTPError`), and validate inputs at the boundary so nothing else can be raised. A catch-all is allowed only to re-raise. Catching to log and continue is allowed only for a side effect whose failure must not stop the caller, such as a notification.
 - A badly typed third-party library gets one typed wrapper at the boundary, not an ignore at every call site.
 
 ## 7. Functions and names
@@ -50,7 +53,7 @@ Follow these exactly. When they conflict with a habit, the rules win; when they 
 
 ## 8. Comments
 
-Default count is **zero**. Allowed only for what code cannot carry: a non-obvious **why**, a Pre/Post **contract**, or a **reference** to a spec or issue. Forbidden: narrating what the code does, restating a signature, excusing weak code, commented-out code, changelog comments. A comment that justifies a workaround is a bug report: refactor.
+**Zero** comments, in every language and config file. Names and types carry the meaning; a Pre/Post contract goes in the docstring. Tool directives (`biome-ignore`) are not comments; give their reason in the directive itself.
 
 ## 9. Leave it better than you found it
 

@@ -1,7 +1,7 @@
 """Pipecat composition root: Deepgram (STT) -> OpenAI (LLM) -> Cartesia (TTS).
 
 Local:  uv run python -m digital_lluc.bot -t webrtc   (see `make dev-bot`)
-Evals:  the dev runner's /ws route, which `pipecat eval` connects to (see backend/evals/)
+Evals:  `pipecat eval` connects to the dev runner's /ws route (see `make eval`)
 Cloud:  Pipecat Cloud's base image calls `bot()` from /app/bot.py.
 """
 
@@ -10,7 +10,6 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal, assert_never
-from uuid import uuid4
 
 from loguru import logger
 from pipecat.audio.vad.silero import SileroVADAnalyzer
@@ -42,7 +41,9 @@ from pydantic import (
     ConfigDict,
     DirectoryPath,
     Field,
+    HttpUrl,
     PositiveInt,
+    Secret,
     SecretStr,
     TypeAdapter,
 )
@@ -62,6 +63,7 @@ from digital_lluc.domain import (
 from digital_lluc.persona import ProfileDocument, compose_system_prompt
 from digital_lluc.recordings import LocalDirectoryRecordingStore, VercelBlobRecordingStore
 from digital_lluc.sentry import init_sentry
+from digital_lluc.slack_activity import notify_session_started
 
 _PROFILE_FILE_NAMES = ("BACKGROUND.yaml", "PERSONAL.yaml")
 _RECORDING_SAMPLE_RATE_HZ = 16000
@@ -69,7 +71,6 @@ _GOODBYE = "That's all the time we have. If you want to keep talking, email the 
 
 
 class _BaseBotSettings(BaseSettings):
-    # Validation errors would otherwise echo the raw settings, secrets included, into the logs.
     model_config = SettingsConfigDict(hide_input_in_errors=True, env_ignore_empty=True)
 
     deepgram_api_key: SecretStr
@@ -81,6 +82,7 @@ class _BaseBotSettings(BaseSettings):
     idle_timeout_seconds: PositiveInt = 120
     profile_dir: DirectoryPath = Path("profile")
     sentry_dsn: SecretStr | None = None
+    slack_activity_webhook_url: Secret[HttpUrl] | None = None
 
 
 class CloudBotSettings(_BaseBotSettings):
@@ -106,26 +108,10 @@ def load_settings() -> CloudBotSettings | LocalBotSettings:
 
 
 class _SessionRequestBody(BaseModel):
-    # Pydantic truncates echoed inputs, which defeats Sentry's identifier scrubbing.
     model_config = ConfigDict(hide_input_in_errors=True)
 
     session_id: str = Field(min_length=1)
     user_id: str = Field(min_length=1)
-
-
-class _LegacySessionRequestBody(BaseModel):
-    """The legacy bot/bot.py contract the live web/ site still sends."""
-
-    # Forbidding extras keeps a partial new-shape body from being read as a legacy one.
-    model_config = ConfigDict(hide_input_in_errors=True, extra="forbid")
-
-    user: str = Field(min_length=1)
-
-
-_SESSION_REQUEST_BODY = TypeAdapter(
-    _SessionRequestBody | _LegacySessionRequestBody,
-    config=ConfigDict(hide_input_in_errors=True),
-)
 
 
 class _ContextMessage(BaseModel):
@@ -136,16 +122,10 @@ class _ContextMessage(BaseModel):
 _CONTEXT_MESSAGES = TypeAdapter(list[_ContextMessage])
 
 
-def parse_session_request(runner_body: object, legacy_session_id: SessionId) -> SessionRequest:
-    """Parses the body the session API sent through Pipecat Cloud or the local runner's /start.
-
-    Post: a legacy {"user": ...} body, which carries no session id, gets `legacy_session_id`.
-    """
-    match _SESSION_REQUEST_BODY.validate_python(runner_body):
-        case _SessionRequestBody(session_id=session_id, user_id=user_id):
-            return SessionRequest(session_id=SessionId(session_id), user_id=UserId(user_id))
-        case _LegacySessionRequestBody(user=user):
-            return SessionRequest(session_id=legacy_session_id, user_id=UserId(user))
+def parse_session_request(runner_body: object) -> SessionRequest:
+    """Parses the body the session API sent through Pipecat Cloud or the local runner's /start."""
+    body = _SessionRequestBody.model_validate(runner_body)
+    return SessionRequest(session_id=SessionId(body.session_id), user_id=UserId(body.user_id))
 
 
 def recording_store(settings: CloudBotSettings | LocalBotSettings) -> RecordingStore:
@@ -193,7 +173,6 @@ class AudioCapture:
 
 
 def transcript(context: LLMContext) -> tuple[TranscriptTurn, ...]:
-    # Read from the context, not turn events: RTVI send-text appends to the context and fires none.
     messages = _CONTEXT_MESSAGES.validate_python(context.get_messages())
     return tuple(TranscriptTurn(message.role, message.content) for message in messages)
 
@@ -214,6 +193,12 @@ async def run_session(
 ) -> None:
     started_at = datetime.now(UTC)
     logger.info(f"🎬 session {request.session_id} for {request.user_id}")
+    webhook_url = settings.slack_activity_webhook_url
+    session_started_notifications = (
+        ()
+        if webhook_url is None
+        else (asyncio.create_task(notify_session_started(webhook_url, request.user_id)),)
+    )
 
     stt = DeepgramSTTService(api_key=settings.deepgram_api_key.get_secret_value())
     llm = OpenAILLMService(
@@ -277,7 +262,6 @@ async def run_session(
         await worker.cancel()
 
     async def on_pipeline_finished(_worker: PipelineWorker, _frame: Frame) -> None:
-        # Fires for both EndFrame and CancelFrame, so the session is saved exactly once.
         logger.info("🏁 pipeline finished")
         if goodbye is not None:
             goodbye.cancel()
@@ -301,6 +285,7 @@ async def run_session(
     logger.info("🚀 starting pipeline worker")
     await runner.add_workers(worker)
     await runner.run()
+    await asyncio.gather(*session_started_notifications)
 
 
 _TRANSPORT_PARAMS: dict[str, Callable[[], TransportParams]] = {
@@ -315,7 +300,7 @@ async def bot(runner_args: RunnerArguments) -> None:
     settings = load_settings()
     if settings.sentry_dsn is not None:
         init_sentry(settings.sentry_dsn)
-    request = parse_session_request(runner_args.body, SessionId(uuid4().hex))
+    request = parse_session_request(runner_args.body)
     transport = await create_transport(runner_args, _TRANSPORT_PARAMS)
     await run_session(transport, request, settings, handle_sigint=runner_args.handle_sigint)
 

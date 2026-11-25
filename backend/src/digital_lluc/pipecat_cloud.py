@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field, SecretStr, ValidationError
 from digital_lluc.domain import AgentUnavailableError, DailyRoom, SessionRequest
 
 _BASE_URL = "https://api.pipecat.daily.co/v1/public"
-# Starting an agent includes creating its Daily room, which can take several seconds on a cold start.
 _TIMEOUT_SECONDS = 30
 
 PipecatCloudClient = NewType("PipecatCloudClient", httpx.AsyncClient)

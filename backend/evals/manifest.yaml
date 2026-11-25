@@ -1,8 +1,6 @@
-# Each run spends OpenAI tokens. From the repo root, with Ollama serving the judge model:
-#   uvx --env-file backend/.env --from "pipecat-ai[cli]==1.15.0" pipecat eval suite backend/evals/manifest.yaml
 scenarios_dir: scenarios
 runs_dir: ../../eval-runs
-spawn: "uv run --no-sync python -m digital_lluc.bot --port {port}"
+spawn: "{python} -m digital_lluc.bot --port {port}"
 suite:
   - bot: ../src/digital_lluc/bot.py
     name: greeting

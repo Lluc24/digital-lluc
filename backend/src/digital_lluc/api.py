@@ -37,7 +37,6 @@ _BEARER_PREFIX = "Bearer "
 
 
 class _BaseApiSettings(BaseSettings):
-    # Validation errors would otherwise echo the raw settings, secrets included, into the logs.
     model_config = SettingsConfigDict(hide_input_in_errors=True, env_ignore_empty=True)
 
     auth_token_secret: SecretStr = Field(min_length=32)

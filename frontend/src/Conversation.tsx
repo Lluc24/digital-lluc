@@ -28,7 +28,6 @@ import {
 } from "./glass";
 import { type SessionClient, useSessionClient } from "./useSessionClient";
 
-// Keeps a message typed before sign-in across the OAuth redirect.
 const UNSENT_MESSAGE_STORAGE_KEY = "digital-lluc-unsent-message";
 
 const SUGGESTED_QUESTIONS = [
@@ -119,7 +118,6 @@ function PartText({
   const { text } = part;
   const separator = part.needsSeparator ? " " : "";
   if (text !== null && typeof text === "object" && "spoken" in text) {
-    // With voice on, text still to be spoken is dimmed; with voice off none of it is ever spoken.
     return (
       <>
         {separator}
@@ -420,7 +418,6 @@ function LivePanel({ state }: { state: ConversationState }) {
   const isReady = transportState === "ready";
   const [hasBotOpened, setHasBotOpened] = useState(false);
 
-  // A message sent while the bot's greeting is starting is dropped, so the queued one waits for that first turn.
   useRTVIClientEvent(
     RTVIEvent.BotLlmStopped,
     useCallback(() => setHasBotOpened(true), []),
@@ -527,7 +524,6 @@ export function Conversation() {
     );
   }
   return (
-    // Keyed by client so per-session state, like whether the bot has opened, starts fresh.
     <PipecatClientProvider key={session.clientId} client={session.client}>
       <LivePanel state={state} />
     </PipecatClientProvider>

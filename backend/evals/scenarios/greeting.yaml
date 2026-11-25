@@ -1,4 +1,6 @@
 name: greeting
+user: !include ../user.yaml
+judge: !include ../judge.yaml
 scenarios:
   - name: greets_on_connect
     turns:

@@ -1,4 +1,6 @@
 name: about_lluc
+user: !include ../user.yaml
+judge: !include ../judge.yaml
 scenarios:
   - name: answers_from_the_background
     turns:
@@ -7,7 +9,9 @@ scenarios:
             within_ms: 30000
       - user: "Where do you work right now?"
         expect:
+          - event: user_transcription
+            text_contains: "work"
           - event: response
             within_ms: 30000
-            text_contains: "Prosper"
+            text_matches: "(?i)prosper"
             eval: "says it works at Prosper AI, in the first person, in a few spoken sentences"
