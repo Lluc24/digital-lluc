@@ -1,7 +1,7 @@
 .PHONY: setup check fix eval dev-api dev-bot dev-web repo-bootstrap
 
 setup:
-	uv sync --all-packages --all-extras
+	uv sync --all-packages --all-extras --group eval
 	cd frontend && pnpm install
 	git config core.hooksPath .githooks
 
@@ -19,7 +19,7 @@ fix:
 	cd frontend && pnpm fix
 
 eval:
-	PYTHONPATH=backend/evals uv run --env-file backend/.env pipecat eval suite backend/evals/manifest.yaml
+	PYTHONPATH=backend/evals SLACK_ACTIVITY_WEBHOOK_URL= SENTRY_DSN= uv run --group eval --env-file backend/.env pipecat eval suite backend/evals/manifest.yaml
 
 dev-api:
 	uv run --env-file backend/.env uvicorn digital_lluc.api:app --reload --port 8000

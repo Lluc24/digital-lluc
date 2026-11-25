@@ -1,0 +1,36 @@
+name: Eval
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eval-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEPLOYMENT: local
+      PYTHONPATH: backend/evals
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      DEEPGRAM_API_KEY: ${{ secrets.DEEPGRAM_API_KEY }}
+      CARTESIA_API_KEY: ${{ secrets.CARTESIA_API_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --all-packages --all-extras --group eval --locked
+      - run: uv run pipecat eval suite backend/evals/manifest.yaml
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: eval-runs
+          path: eval-runs/
+          if-no-files-found: ignore

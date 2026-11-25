@@ -7,8 +7,8 @@ dev = [
     "mypy>=2.4.1",
     "pytest>=9.2.0",
     "types-pyyaml>=6.0",
-    "pipecat-ai[cli]~=1.15.0",
 ]
+eval = ["pipecat-ai[cli]"]
 
 [tool.ruff]
 target-version = "py313"
