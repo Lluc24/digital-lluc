@@ -28,9 +28,11 @@ jobs:
           enable-cache: true
       - run: uv sync --all-packages --all-extras --group eval --locked
       - run: uv run pipecat eval suite backend/evals/manifest.yaml
-      - if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: eval-runs
-          path: eval-runs/
-          if-no-files-found: ignore
+      - if: failure() || cancelled()
+        run: |
+          shopt -s dotglob nullglob
+          for log in eval-runs/*/results.jsonl eval-runs/*/logs/*.log; do
+            echo "::group::$log"
+            cat "$log"
+            echo "::endgroup::"
+          done
