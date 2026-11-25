@@ -1,0 +1,9 @@
+scenarios_dir: scenarios
+runs_dir: ../../eval-runs
+spawn: "{python} -m digital_lluc.bot --port {port}"
+suite:
+  - bot: ../src/digital_lluc/bot.py
+    name: digital-lluc
+    runner_body:
+      data: {session_id: eval, user_id: eval@lluc.sh}
+    scenarios: [greeting, about_lluc]

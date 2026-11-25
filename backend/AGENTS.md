@@ -5,3 +5,4 @@ Two composition roots share one domain: api.py (FastAPI, deployed on Vercel) and
 - Adapters (one module per external service) are the only code that does I/O; they parse responses into domain types and raise domain exceptions.
 - api.py and bot.py wire adapters together. One pydantic-settings object per root; no `os.environ` anywhere else.
 - `mypy --strict` and ruff clean; config in the root pyproject.toml.
+- evals/: `pipecat eval` scenarios against the real bot (voice in, voice out, OpenAI judge); `make eval` runs them, and CI runs them on every PR.

@@ -39,8 +39,8 @@ Follow these exactly. When they conflict with a habit, the rules win; when they 
 
 ## 6. No escape hatches
 
-- No `# type: ignore`, `cast()`, or `Any` outside adapters. Each hides a broken contract. Fix the type or the code. Inside an adapter, name the library and reason on the same line.
-- No inline `# noqa`. A deliberate lint exception is a `per-file-ignores` entry in `pyproject.toml`, scoped to the one file, with a comment naming the library and the reason.
+- No `# type: ignore`, `cast()`, or `Any` outside adapters. Each hides a broken contract. Fix the type or the code.
+- No inline `# noqa`. A deliberate lint exception is a `per-file-ignores` entry in `pyproject.toml`, scoped to the one file.
 - No `except Exception`. Catch the specific exceptions the library documents (e.g. `httpx.HTTPError`), and validate inputs at the boundary so nothing else can be raised. A catch-all is allowed only to re-raise. Catching to log and continue is allowed only for a side effect whose failure must not stop the caller, such as a notification.
 - A badly typed third-party library gets one typed wrapper at the boundary, not an ignore at every call site.
 
@@ -53,7 +53,7 @@ Follow these exactly. When they conflict with a habit, the rules win; when they 
 
 ## 8. Comments
 
-Default count is **zero**. Allowed only for what code cannot carry: a non-obvious **why**, a Pre/Post **contract**, or a **reference** to a spec or issue. Forbidden: narrating what the code does, restating a signature, excusing weak code, commented-out code, changelog comments. A comment that justifies a workaround is a bug report: refactor.
+**Zero** comments, in every language and config file. Names and types carry the meaning; a Pre/Post contract goes in the docstring. Tool directives (`biome-ignore`) are not comments; give their reason in the directive itself.
 
 ## 9. Leave it better than you found it
 

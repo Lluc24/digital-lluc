@@ -19,8 +19,6 @@ async def notify_session_started(webhook_url: Secret[HttpUrl], user_id: UserId) 
     """Post: Slack received a message naming user_id. Raises nothing, so a missed notification
     never ends a session. Failures are reported without user_id, which goes only to Slack."""
     try:
-        # trust_env=False: proxy and CA env vars would make the constructor raise outside
-        # HTTPError; with a validated URL, post raises only HTTPError and the timeout TimeoutError.
         async with (
             asyncio.timeout(_WEBHOOK_TIMEOUT_SECONDS),
             httpx.AsyncClient(trust_env=False) as client,
@@ -34,6 +32,5 @@ async def notify_session_started(webhook_url: Secret[HttpUrl], user_id: UserId) 
         sentry_sdk.capture_exception(error)
     else:
         if response.is_error:
-            # Not raise_for_status: its message holds the URL, which is the webhook's credential.
             logger.warning(f"📣 Slack activity webhook answered {response.status_code}")
             sentry_sdk.capture_message(f"Slack activity webhook answered {response.status_code}")

@@ -30,7 +30,8 @@
         "required_status_checks": [
           { "context": "python" },
           { "context": "frontend" },
-          { "context": "pr-title" }
+          { "context": "pr-title" },
+          { "context": "eval" }
         ]
       }
     }

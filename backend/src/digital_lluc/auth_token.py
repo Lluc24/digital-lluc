@@ -10,7 +10,6 @@ _ALGORITHM = "HS256"
 
 
 class _Claims(BaseModel):
-    # Pydantic truncates echoed inputs, which defeats Sentry's identifier scrubbing.
     model_config = ConfigDict(hide_input_in_errors=True)
 
     sub: str = Field(min_length=1)

@@ -110,7 +110,6 @@ export function useSessionClient(): SessionClient {
 
   const start = useCallback(
     (withMic: boolean) => {
-      // This hook is the layer that can act on a failed connection: it tells the visitor and lets the next message retry.
       pendingStartRef.current ??= startSession(withMic)
         .catch((error: unknown) => {
           console.error("❌ could not connect", error);

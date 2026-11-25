@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from sentry_sdk._types import Breadcrumb, BreadcrumbHint, Event, Hint
 
 _FLUSH_TIMEOUT_SECONDS = 2.0
-# User ids are login emails and session ids are UUIDs (see auth_token.py and api.py).
 _IDENTIFIER_PATTERN = re.compile(
     r"[^\s@\"<>(),;:\[\]{}]+@[^\s@\"'<>(),;:\[\]{}]+"
     r"|[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}"
@@ -36,7 +35,7 @@ def scrub_identifiers(value: object) -> object:
 
 
 def _scrub_event(event: "Event", _hint: "Hint") -> "Event":
-    return cast("Event", scrub_identifiers(event))  # sentry_sdk: Event TypedDict, shape kept
+    return cast("Event", scrub_identifiers(event))
 
 
 def _scrub_breadcrumb(breadcrumb: "Breadcrumb", _hint: "BreadcrumbHint") -> "Breadcrumb":
@@ -51,13 +50,11 @@ def init_sentry(dsn: SecretStr) -> None:
     sentry_sdk.init(
         dsn=dsn.get_secret_value(),
         send_default_pii=False,
-        # Frame locals hold requests, Redis keys and transcripts.
         include_local_variables=False,
         traces_sample_rate=0.0,
         profiles_sample_rate=0.0,
         before_send=_scrub_event,
         before_breadcrumb=_scrub_breadcrumb,
-        # Its breadcrumbs carry request URLs, and the Slack webhook URL is itself the credential.
         disabled_integrations=[HttpxIntegration()],
     )
 
@@ -91,8 +88,6 @@ class FlushSentryMiddleware:
         try:
             await self.app(scope, receive, flush_then_send)
         except Exception as error:
-            # Sentry's own capture sits above this middleware, after the 500 is sent; its dedupe
-            # drops that second capture of the same exception.
             _capture_unhandled(error)
             await _flush()
             raise
