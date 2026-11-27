@@ -13,7 +13,7 @@ export default function Privacy() {
           Privacy
         </h1>
         <p className="text-night/50 text-sm dark:text-white/50">
-          Last updated: 9 November 2026
+          Last updated: 27 November 2026
         </p>
         <p>
           This site (lluc.sh, digital-lluc) is a personal project run by Lluc
@@ -42,7 +42,9 @@ export default function Privacy() {
         </p>
         <p>
           When you start a voice conversation, your sign-in email is sent to my
-          Slack so I get an activity notification.
+          private Slack workspace so I get an activity notification. When it
+          ends, its transcript and, when audio was used, its recording are also
+          posted there, linked to your email. Only I can see them.
         </p>
         <p>
           Backend errors are reported to Sentry (error monitoring). These

@@ -7,9 +7,15 @@ from pathlib import Path
 from loguru import logger
 from vercel.blob import BlobError, put_blob
 
-from digital_lluc.domain import RecordingStoreError, SessionAudio, SessionRecording
+from digital_lluc.domain import (
+    RecordingStoreError,
+    SessionAudio,
+    SessionRecording,
+    TranscriptTurn,
+)
 
 _PCM16_SAMPLE_WIDTH_BYTES = 2
+_TRANSCRIPT_SPEAKERS = {"user": "Visitor", "assistant": "Bot"}
 
 
 def encode_wav(audio: SessionAudio) -> bytes:
@@ -35,6 +41,25 @@ def encode_session_json(recording: SessionRecording) -> bytes:
         ensure_ascii=False,
         indent=2,
     ).encode()
+
+
+def spoken_transcript_lines(transcript: tuple[TranscriptTurn, ...]) -> tuple[str, ...]:
+    """Post: one "Visitor:" or "Bot:" line per spoken turn; developer and system instructions are left out."""
+    return tuple(
+        f"{_TRANSCRIPT_SPEAKERS[turn.role]}: {turn.text}"
+        for turn in transcript
+        if turn.role in _TRANSCRIPT_SPEAKERS
+    )
+
+
+def encode_transcript_text(recording: SessionRecording, lines: tuple[str, ...]) -> bytes:
+    """Pre: lines are spoken_transcript_lines(recording.transcript)."""
+    header = (
+        f"Session: {recording.request.session_id}",
+        f"Started: {recording.started_at.isoformat()}",
+        f"Duration: {recording.duration_seconds}s",
+    )
+    return "\n".join((*header, "", *lines, "")).encode()
 
 
 def _recording_files(recording: SessionRecording) -> dict[str, tuple[bytes, str]]:
