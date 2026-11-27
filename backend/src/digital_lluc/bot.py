@@ -8,7 +8,7 @@ import asyncio
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated, Literal, assert_never
+from typing import Literal, Self, assert_never
 from uuid import uuid4
 
 from loguru import logger
@@ -44,8 +44,8 @@ from pydantic import (
     PositiveInt,
     Secret,
     SecretStr,
-    StringConstraints,
     TypeAdapter,
+    model_validator,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -64,13 +64,15 @@ from digital_lluc.persona import ProfileDocument, compose_system_prompt
 from digital_lluc.recordings import LocalDirectoryRecordingStore, VercelBlobRecordingStore
 from digital_lluc.sentry import init_sentry
 from digital_lluc.slack_activity import notify_session_started
-from digital_lluc.slack_recordings import SlackRecordingChannel, post_session_recording
+from digital_lluc.slack_recordings import (
+    SlackChannelId,
+    SlackRecordingChannel,
+    post_session_recording,
+)
 
 _PROFILE_FILE_NAMES = ("BACKGROUND.yaml", "PERSONAL.yaml")
 _RECORDING_SAMPLE_RATE_HZ = 16000
 _GOODBYE = "That's all the time we have. If you want to keep talking, email the real Lluc. Bye!"
-
-SlackChannelId = Annotated[str, StringConstraints(pattern=r"^[CG][A-Z0-9]+$")]
 
 
 class _BaseBotSettings(BaseSettings):
@@ -89,6 +91,12 @@ class _BaseBotSettings(BaseSettings):
     slack_activity_webhook_url: Secret[HttpUrl] | None = None
     slack_bot_token: SecretStr | None = None
     slack_activity_channel_id: SlackChannelId | None = None
+
+    @model_validator(mode="after")
+    def _require_slack_bot_token_and_channel_together(self) -> Self:
+        if (self.slack_bot_token is None) != (self.slack_activity_channel_id is None):
+            raise ValueError("SLACK_BOT_TOKEN and SLACK_ACTIVITY_CHANNEL_ID must be set together")
+        return self
 
 
 class CloudBotSettings(_BaseBotSettings):
@@ -169,16 +177,10 @@ def recording_store(settings: CloudBotSettings | LocalBotSettings) -> RecordingS
 def slack_recording_channel(
     settings: CloudBotSettings | LocalBotSettings,
 ) -> SlackRecordingChannel | None:
-    """Post: None when both Slack settings are empty; raises when only one of them is set."""
-    match settings.slack_bot_token, settings.slack_activity_channel_id:
-        case None, None:
-            return None
-        case SecretStr() as bot_token, str() as channel_id:
-            return SlackRecordingChannel(bot_token, channel_id)
-        case _:
-            raise ValueError(
-                "SLACK_BOT_TOKEN and SLACK_ACTIVITY_CHANNEL_ID must be set together; only one is set"
-            )
+    """Pre: settings validated that the two Slack settings are set together or not at all."""
+    if settings.slack_bot_token is None or settings.slack_activity_channel_id is None:
+        return None
+    return SlackRecordingChannel(settings.slack_bot_token, settings.slack_activity_channel_id)
 
 
 def load_system_prompt(profile_dir: Path) -> str:
@@ -321,7 +323,6 @@ async def run_session(
         )
         await recording_store(settings).save(recording)
         logger.info(f"🗂️ recorded session {request.session_id}")
-        # After the save, so a failed Slack post can never cost the stored recording.
         if slack_channel is not None:
             await post_session_recording(slack_channel, recording)
 

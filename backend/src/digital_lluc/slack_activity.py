@@ -6,13 +6,9 @@ from loguru import logger
 from pydantic import HttpUrl, Secret
 
 from digital_lluc.domain import UserId
+from digital_lluc.slack_text import escape_slack_text
 
 _WEBHOOK_TIMEOUT_SECONDS = 2.0
-
-
-def escape_slack_text(text: str) -> str:
-    """Reference: docs.slack.dev/messaging/formatting-message-text#escaping"""
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 async def notify_session_started(webhook_url: Secret[HttpUrl], user_id: UserId) -> None:

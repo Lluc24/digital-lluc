@@ -1,19 +1,30 @@
 import asyncio
 import json
+import wave
 from dataclasses import dataclass
-from typing import Literal
+from typing import Annotated, Literal
 
 import httpx
 import sentry_sdk
 from loguru import logger
-from pydantic import BaseModel, ConfigDict, HttpUrl, SecretStr, TypeAdapter, ValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    HttpUrl,
+    SecretStr,
+    StringConstraints,
+    TypeAdapter,
+    ValidationError,
+)
 
 from digital_lluc.domain import SessionRecording
-from digital_lluc.recordings import encode_transcript_text, encode_wav, spoken_transcript_lines
-from digital_lluc.slack_activity import escape_slack_text
+from digital_lluc.recording_formats import encode_transcript_text, encode_wav, has_spoken_turns
+from digital_lluc.slack_text import escape_slack_text
+
+SlackChannelId = Annotated[str, StringConstraints(pattern=r"^[CG][A-Z0-9]+$")]
 
 _SLACK_API_URL = "https://slack.com/api"
-# Ten minutes of 16 kHz mono PCM16 is about 19 MB; this bounds how long a finished session waits.
+# A full-length session's WAV runs to tens of MB; this bounds how long a finished session waits.
 _UPLOAD_TIMEOUT_SECONDS = 30.0
 
 
@@ -22,7 +33,7 @@ class SlackRecordingChannel:
     """Pre: bot_token has files:write and its app is a member of channel_id."""
 
     bot_token: SecretStr
-    channel_id: str
+    channel_id: SlackChannelId
 
 
 @dataclass(frozen=True)
@@ -55,27 +66,32 @@ class _UploadUrl(_SlackOk):
     file_id: str
 
 
-_SLACK_STATUS = TypeAdapter(_SlackOk | _SlackFailure, config=ConfigDict(hide_input_in_errors=True))
+_UPLOAD_URL_RESPONSE = TypeAdapter(
+    _UploadUrl | _SlackFailure, config=ConfigDict(hide_input_in_errors=True)
+)
+_COMPLETE_UPLOAD_RESPONSE = TypeAdapter(
+    _SlackOk | _SlackFailure, config=ConfigDict(hide_input_in_errors=True)
+)
+type _UploadFailure = (
+    httpx.HTTPError | TimeoutError | ValidationError | wave.Error | _SlackUploadError
+)
 
 
 def _session_files(recording: SessionRecording) -> tuple[_SlackFile, ...]:
     session_id = recording.request.session_id
-    lines = spoken_transcript_lines(recording.transcript)
-    transcript = (
-        (
-            _SlackFile(
-                "transcript.txt",
-                f"Transcript {session_id}",
-                encode_transcript_text(recording, lines),
-            ),
-        )
-        if lines
-        else ()
-    )
     audio = (
         ()
         if recording.audio is None
         else (_SlackFile("audio.wav", f"Audio {session_id}", encode_wav(recording.audio)),)
+    )
+    transcript = (
+        (
+            _SlackFile(
+                "transcript.txt", f"Transcript {session_id}", encode_transcript_text(recording)
+            ),
+        )
+        if has_spoken_turns(recording.transcript)
+        else ()
     )
     return (*audio, *transcript)
 
@@ -89,12 +105,12 @@ def _session_comment(recording: SessionRecording) -> str:
     )
 
 
-async def _call_slack[ResponseT: BaseModel](
+async def _call_slack[ResponseT: _SlackOk](
     client: httpx.AsyncClient,
     channel: SlackRecordingChannel,
     method: str,
     form: dict[str, str],
-    response_type: type[ResponseT],
+    response_adapter: TypeAdapter[ResponseT | _SlackFailure],
 ) -> ResponseT:
     # A form body, not query parameters as slack_sdk sends, keeps the visitor email out of URL logs.
     response = await client.post(
@@ -104,11 +120,12 @@ async def _call_slack[ResponseT: BaseModel](
     )
     if response.is_error:
         raise _SlackUploadError(f"{method} answered HTTP {response.status_code}")
-    match _SLACK_STATUS.validate_json(response.content):
+    parsed = response_adapter.validate_json(response.content)
+    match parsed:
         case _SlackFailure(error=error):
             raise _SlackUploadError(f"{method} answered {error}")
-        case _SlackOk():
-            return response_type.model_validate_json(response.content)
+        case _:
+            return parsed
 
 
 async def _upload(
@@ -120,7 +137,7 @@ async def _upload(
         channel,
         "files.getUploadURLExternal",
         {"filename": file.filename, "length": str(len(file.content))},
-        _UploadUrl,
+        _UPLOAD_URL_RESPONSE,
     )
     # The pre-signed URL is the credential here, so no bot token goes with it.
     response = await client.post(str(upload_url.upload_url), content=file.content)
@@ -129,7 +146,32 @@ async def _upload(
     return upload_url.file_id
 
 
-def _failure_summary(error: Exception) -> str:
+async def _post_files(
+    channel: SlackRecordingChannel, recording: SessionRecording, files: tuple[_SlackFile, ...]
+) -> None:
+    # trust_env=False, as in slack_activity.py: proxy and CA env vars would make the
+    # constructor raise outside HTTPError.
+    async with httpx.AsyncClient(trust_env=False) as client:
+        file_ids = tuple([await _upload(client, channel, file) for file in files])
+        await _call_slack(
+            client,
+            channel,
+            "files.completeUploadExternal",
+            {
+                "files": json.dumps(
+                    [
+                        {"id": file_id, "title": file.title}
+                        for file_id, file in zip(file_ids, files, strict=True)
+                    ]
+                ),
+                "channel_id": channel.channel_id,
+                "initial_comment": _session_comment(recording),
+            },
+            _COMPLETE_UPLOAD_RESPONSE,
+        )
+
+
+def _failure_summary(error: _UploadFailure) -> str:
     match error:
         case _SlackUploadError():
             return str(error)
@@ -143,35 +185,12 @@ async def post_session_recording(
     """Post: channel holds the recording's audio and spoken transcript, whichever exist, in one
     message naming the visitor and session. Raises nothing and gives up after a bounded time, so a
     failed post never fails a session. Failures are reported without the visitor email."""
-    files = _session_files(recording)
-    if not files:
-        return
     try:
-        # trust_env=False, as in slack_activity.py: proxy and CA env vars would make the
-        # constructor raise outside HTTPError.
-        async with (
-            asyncio.timeout(_UPLOAD_TIMEOUT_SECONDS),
-            httpx.AsyncClient(trust_env=False) as client,
-        ):
-            file_ids = [await _upload(client, channel, file) for file in files]
-            await _call_slack(
-                client,
-                channel,
-                "files.completeUploadExternal",
-                {
-                    "files": json.dumps(
-                        [
-                            {"id": file_id, "title": file.title}
-                            for file_id, file in zip(file_ids, files, strict=True)
-                        ]
-                    ),
-                    "channel_id": channel.channel_id,
-                    "initial_comment": _session_comment(recording),
-                },
-                _SlackOk,
-            )
-    except (httpx.HTTPError, TimeoutError, ValidationError, _SlackUploadError) as error:
+        async with asyncio.timeout(_UPLOAD_TIMEOUT_SECONDS):
+            files = _session_files(recording)
+            if files:
+                await _post_files(channel, recording, files)
+                logger.info(f"📣 posted {len(files)} session recording files to Slack")
+    except (httpx.HTTPError, TimeoutError, ValidationError, wave.Error, _SlackUploadError) as error:
         logger.warning(f"📣 Slack session recording upload failed: {_failure_summary(error)}")
         sentry_sdk.capture_exception(error)
-    else:
-        logger.info(f"📣 posted {len(files)} session recording files to Slack")
