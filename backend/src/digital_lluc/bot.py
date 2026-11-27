@@ -8,7 +8,7 @@ import asyncio
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal, assert_never
+from typing import Literal, Self, assert_never
 from uuid import uuid4
 
 from loguru import logger
@@ -45,6 +45,7 @@ from pydantic import (
     Secret,
     SecretStr,
     TypeAdapter,
+    model_validator,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -63,6 +64,11 @@ from digital_lluc.persona import ProfileDocument, compose_system_prompt
 from digital_lluc.recordings import LocalDirectoryRecordingStore, VercelBlobRecordingStore
 from digital_lluc.sentry import init_sentry
 from digital_lluc.slack_activity import notify_session_started
+from digital_lluc.slack_recordings import (
+    SlackChannelId,
+    SlackRecordingChannel,
+    post_session_recording,
+)
 
 _PROFILE_FILE_NAMES = ("BACKGROUND.yaml", "PERSONAL.yaml")
 _RECORDING_SAMPLE_RATE_HZ = 16000
@@ -83,6 +89,14 @@ class _BaseBotSettings(BaseSettings):
     profile_dir: DirectoryPath = Path("profile")
     sentry_dsn: SecretStr | None = None
     slack_activity_webhook_url: Secret[HttpUrl] | None = None
+    slack_bot_token: SecretStr | None = None
+    slack_activity_channel_id: SlackChannelId | None = None
+
+    @model_validator(mode="after")
+    def _require_slack_bot_token_and_channel_together(self) -> Self:
+        if (self.slack_bot_token is None) != (self.slack_activity_channel_id is None):
+            raise ValueError("SLACK_BOT_TOKEN and SLACK_ACTIVITY_CHANNEL_ID must be set together")
+        return self
 
 
 class CloudBotSettings(_BaseBotSettings):
@@ -160,6 +174,15 @@ def recording_store(settings: CloudBotSettings | LocalBotSettings) -> RecordingS
             assert_never(settings)
 
 
+def slack_recording_channel(
+    settings: CloudBotSettings | LocalBotSettings,
+) -> SlackRecordingChannel | None:
+    """Pre: settings validated that the two Slack settings are set together or not at all."""
+    if settings.slack_bot_token is None or settings.slack_activity_channel_id is None:
+        return None
+    return SlackRecordingChannel(settings.slack_bot_token, settings.slack_activity_channel_id)
+
+
 def load_system_prompt(profile_dir: Path) -> str:
     return compose_system_prompt(
         [
@@ -222,6 +245,7 @@ async def run_session(
         if webhook_url is None
         else (asyncio.create_task(notify_session_started(webhook_url, request.user_id)),)
     )
+    slack_channel = slack_recording_channel(settings)
 
     stt = DeepgramSTTService(api_key=settings.deepgram_api_key.get_secret_value())
     llm = OpenAILLMService(
@@ -289,17 +313,18 @@ async def run_session(
         logger.info("🏁 pipeline finished")
         if goodbye is not None:
             goodbye.cancel()
-        await recording_store(settings).save(
-            SessionRecording(
-                request=request,
-                started_at=started_at,
-                ended_at=datetime.now(UTC),
-                token_usage=token_usage_tally.token_usage,
-                transcript=transcript(context),
-                audio=audio_capture.audio,
-            )
+        recording = SessionRecording(
+            request=request,
+            started_at=started_at,
+            ended_at=datetime.now(UTC),
+            token_usage=token_usage_tally.token_usage,
+            transcript=transcript(context),
+            audio=audio_capture.audio,
         )
+        await recording_store(settings).save(recording)
         logger.info(f"🗂️ recorded session {request.session_id}")
+        if slack_channel is not None:
+            await post_session_recording(slack_channel, recording)
 
     transport.add_event_handler("on_client_connected", on_client_connected)
     transport.add_event_handler("on_client_disconnected", on_client_disconnected)

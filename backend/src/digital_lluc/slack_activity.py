@@ -6,13 +6,9 @@ from loguru import logger
 from pydantic import HttpUrl, Secret
 
 from digital_lluc.domain import UserId
+from digital_lluc.slack_text import escape_slack_text
 
 _WEBHOOK_TIMEOUT_SECONDS = 2.0
-
-
-def _escape_slack_text(text: str) -> str:
-    """Reference: docs.slack.dev/messaging/formatting-message-text#escaping"""
-    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 async def notify_session_started(webhook_url: Secret[HttpUrl], user_id: UserId) -> None:
@@ -27,7 +23,7 @@ async def notify_session_started(webhook_url: Secret[HttpUrl], user_id: UserId) 
         ):
             response = await client.post(
                 str(webhook_url.get_secret_value()),
-                json={"text": f"Digital Lluc conversation started: {_escape_slack_text(user_id)}"},
+                json={"text": f"Digital Lluc conversation started: {escape_slack_text(user_id)}"},
             )
     except (httpx.HTTPError, TimeoutError) as error:
         logger.warning(f"📣 Slack activity notification failed: {type(error).__name__}")
